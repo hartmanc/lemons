@@ -293,11 +293,20 @@ const RAW = `
 189 2:44.196 19
 190 2:41.349 19
 191 2:39.218 19
+193 2:40.575 19
+194 3:05.923 19
+195 2:37.825 19
+196 2:41.757 19
+197 2:36.595 19
+198 2:40.818 19
+199 2:36.144 19
+200 2:47.694 19
+201 2:41.944 19
 `;
 // Driver order on day 1 is assumed to match the roster order. The first change
 // happened somewhere in laps 1-28, which aren't in timing.
 const DRIVERS = {
-  Sarah:  {name:"Sarah",  c:"--s1"},
+  Sarah:  {name:"Sarah",  c:"--s1", note:"Rookie", noteTitle:"Sarah's 3rd race"},
   Thomas: {name:"Thomas", c:"--s2"},
   Coby:   {name:"Coby",   c:"--s3"},
   Pablo:  {name:"Pablo",  c:"--s4"},
@@ -326,6 +335,7 @@ const lastLap = laps[laps.length-1].lap;
 // Day 1 was an 8-hour race: the timing clock read 8:00:44 just after the flag.
 const DAY1_SECS = 8*3600;
 const lapByNum = new Map(laps.map(l=>[l.lap,l]));
+const missingLaps = []; for (let n=firstLogged; n<=lastLap; n++) if (!lapByNum.has(n)) missingLaps.push(n);
 STINTS.forEach(s => {
   Object.assign(s, DRIVERS[s.driver]);
   if (s.from == null) s.from = firstLogged;
@@ -350,7 +360,7 @@ function stats(st, dropSlow){
   mine.forEach(l => { l.outlier = !excluded(l) && clean.length > 2 && l.t > cut; });
   const counted = dropSlow ? clean.filter(l => !l.outlier) : clean;
   // Stint time: every lap in the stint, driver-change lap included. Laps missing
-  // from timing (72, 121) are filled with the stint's median lap.
+  // from timing (e.g. 72, 121) are filled with the stint's median lap.
   let secs = null, approx = false;
   const timed = mine.filter(l => !l.overnight);
   if (timed.length){
@@ -388,6 +398,7 @@ function render(){
     const d = x.d;
     const tag = '<span class="tags">' + [
       live && live.driver === d.name && '<span class="pill live">In car</span>',
+      d.note && `<span class="pill fast" title="${d.noteTitle||""}">${d.note}</span>`,
       x.avg!=null && x.avg===bestAvg && '<span class="pill fast">Fastest avg</span>',
       x.best!=null && x.best===allBest.t && '<span class="pill fast">Fastest lap</span>',
     ].filter(Boolean).join("") + '</span>';
@@ -422,7 +433,7 @@ function render(){
   drawDist(D);
   document.getElementById("notes").innerHTML =
     `<div>Averages leave out double-yellow laps, the red-flag lap (${laps.filter(l=>l.red).map(l=>l.lap).join(", ")}), the overnight lap, and driver-change laps over 7:00 (${laps.filter(l=>l.pit).map(l=>l.lap).join(", ")}). Laps over 4:00 are drawn at the top of the chart${dropSlow?". Outlier laps are also dropped: anything more than 2 standard deviations slower than the mean for that stint (hollow markers). Dropped: "+laps.filter(l=>l.outlier).map(l=>l.lap).join(", "):""}.</div>
-     <div>Day 1 laps 1–28 aren't available in timing, so Sarah's day 1 stint and Thomas's first laps are missing. Laps 72 and 121 are not listed in timing.</div>
+     <div>Day 1 laps 1–28 aren't available in timing, so Sarah's day 1 stint and Thomas's first laps are missing. Laps ${missingLaps.join(", ")} are not listed in timing.</div>
      <div>Stint time adds up each stint's laps, starting with the driver-change lap. + means part of the stint is missing (not in timing, inside the overnight lap, or still running). ≈ means a missing lap was filled in with that stint's median lap. *Sarah's day 1 time is laps 1–28 from the 8-hour race length, and includes the start of Thomas's stint.</div>`;
 
   // Table
