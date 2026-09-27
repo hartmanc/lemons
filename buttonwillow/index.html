@@ -207,8 +207,22 @@ const RAW = `
 127 7:51.693 21
 128 3:10.622 21
 129 2:40.552 21
+130 2:43.247 21
+131 2:38.313 21
+132 2:35.878 21
+133 2:32.035 21
 134 2:31.792 21
 135 2:39.317 21
+136 2:33.771 21
+137 2:36.973 21
+138 2:36.882 21
+139 2:34.462 21
+140 2:42.674 21
+141 2:44.560 21
+142 2:38.707 21
+143 2:35.917 21
+144 2:48.063 21
+145 2:42.542 21
 `;
 // Driver order is assumed to match the roster order. The first change
 // happened somewhere in laps 1-28, which aren't logged yet.
@@ -262,7 +276,7 @@ function render(){
     const d = s.d;
     const range = d.name==="Sarah" ? "Laps 1–?" : `Laps ${d.from===firstLogged && d.name==="Thomas" ? "?–" : d.from+"–"}${d.live? d.to+"+" : d.to}`;
     const tag = d.live ? '<span class="pill live">In car</span>' : (s.avg!=null && s.avg===bestAvg ? '<span class="pill fast">Fastest avg</span>' : "");
-    const avg = s.avg!=null ? `<div class="avg">${fmt(s.avg)}</div>` : `<div class="avg none">Laps 1–28 not logged yet</div>`;
+    const avg = s.avg!=null ? `<div class="avg">${fmt(s.avg)}</div>` : `<div class="avg none">No timing data (laps 1–28 not in Race Monitor)</div>`;
     const delta = s.avg!=null && s.avg!==bestAvg ? `+${(s.avg-bestAvg).toFixed(3)}s` : (s.avg!=null ? "—" : "");
     return `<article class="tile" style="--c:var(${d.c})">
       <div class="name">${d.name}${tag}</div>
@@ -284,7 +298,7 @@ function render(){
   drawChart(S, dropSlow);
   document.getElementById("notes").innerHTML =
     `<div>Averages leave out yellow laps and driver-change laps (over 7:00)${dropSlow?", and any lap over 3:30":""}. Lap ${laps.filter(l=>l.pit).map(l=>l.lap).join(", ")} were driver changes and sit above the chart.</div>
-     <div>Missing so far: laps 1–28, 130–133. Laps 72 and 121 are not listed in timing.</div>`;
+     <div>Laps 1–28 aren't available in timing, so Sarah's stint and Thomas's first laps are missing. Laps 72 and 121 are not listed in timing.</div>`;
 
   // Table
   document.getElementById("tbl").innerHTML = `<thead><tr><th>Lap</th><th>Pos</th><th>Driver</th><th>Time</th><th>Note</th></tr></thead><tbody>` +
@@ -311,7 +325,7 @@ function drawChart(S, dropSlow){
   });
   // unlogged region
   g += `<rect x="${X(0.5)}" y="${m.t}" width="${X(firstLogged-0.5)-X(0.5)}" height="${ih}" fill="url(#hatch)"/>`;
-  g += `<text x="${(X(0.5)+X(firstLogged-0.5))/2}" y="${m.t+ih/2}" text-anchor="middle">${W<600?"not logged":"laps 1–28 not logged"}</text>`;
+  g += `<text x="${(X(0.5)+X(firstLogged-0.5))/2}" y="${m.t+ih/2}" text-anchor="middle">${W<600?"no data":"laps 1–28 not in timing"}</text>`;
   // yellow bands
   laps.filter(l=>l.yellow).forEach(l=>{
     g += `<rect x="${X(l.lap-0.5)}" y="${m.t}" width="${X(l.lap+0.5)-X(l.lap-0.5)}" height="${ih}" fill="url(#yhatch)"/>`;
