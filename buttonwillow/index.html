@@ -1,0 +1,395 @@
+<title>Buttonwillow #619 Stints</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#f3f4f6; --panel:#ffffff; --ink:#12151a; --ink-2:#4a505a; --ink-3:#7c828c;
+  --rule:#dfe2e7; --grid:#e8eaee;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#4a3aa7; --s5:#e87ba4;
+  --yellow:#f2c200; --yellow-ink:#7a5d00; --live:#1a9e55;
+  --band-a:.07;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0f1114; --panel:#171a1f; --ink:#f2f3f5; --ink-2:#b4b9c2; --ink-3:#7f8590;
+    --rule:#2a2e35; --grid:#23272d;
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#9085e9; --s5:#d55181;
+    --yellow:#e0b400; --yellow-ink:#f2d160; --live:#3cc27a; --band-a:.12;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0f1114; --panel:#171a1f; --ink:#f2f3f5; --ink-2:#b4b9c2; --ink-3:#7f8590;
+  --rule:#2a2e35; --grid:#23272d;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#9085e9; --s5:#d55181;
+  --yellow:#e0b400; --yellow-ink:#f2d160; --live:#3cc27a; --band-a:.12;
+}
+body{background:var(--bg);color:var(--ink);font:15px/1.45 Barlow,system-ui,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:20px 48px;display:grid;gap:18px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:8px 24px;border-bottom:2px solid var(--ink);padding-bottom:10px}
+h1{font:700 clamp(28px,5vw,44px)/1 "Barlow Condensed",sans-serif;letter-spacing:.01em;margin:0;text-transform:uppercase;text-wrap:balance}
+h1 .num{display:inline-block;background:var(--ink);color:var(--bg);padding:0 .22em;margin-right:.2em}
+.sub{color:var(--ink-2);font-size:14px}
+.meta{font:500 13px "JetBrains Mono",monospace;color:var(--ink-2);text-align:right;font-variant-numeric:tabular-nums}
+.label{font:600 12px "Barlow Condensed",sans-serif;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+.tiles{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+@media (max-width:900px){.tiles{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:560px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.tile{background:var(--panel);border:1px solid var(--rule);border-top:4px solid var(--c);padding:10px 12px 12px;display:grid;gap:2px;align-content:start}
+.tile .name{display:flex;align-items:center;justify-content:space-between;gap:6px;font:700 20px "Barlow Condensed",sans-serif;text-transform:uppercase;letter-spacing:.03em}
+.tile .avg{font:500 26px/1.1 "JetBrains Mono",monospace;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.tile .avg.none{font-size:15px;color:var(--ink-3);font-family:Barlow,sans-serif;letter-spacing:0;padding-block:6px}
+.tile dl{display:grid;grid-template-columns:auto 1fr;gap:1px 10px;margin:6px 0 0;font-size:13px}
+.tile dt{color:var(--ink-3)} .tile dd{margin:0;text-align:right;font:13px "JetBrains Mono",monospace;font-variant-numeric:tabular-nums}
+.pill{font:600 11px Barlow,sans-serif;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:999px;border:1px solid currentColor;white-space:nowrap}
+.pill.live{color:var(--live)} .pill.live::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor;margin-right:5px;vertical-align:1px}
+.pill.fast{color:var(--ink-2)}
+.panel{background:var(--panel);border:1px solid var(--rule);padding:14px 14px 10px}
+.panel-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px 16px;margin-bottom:6px}
+.panel-head h2{margin:0;font:700 20px "Barlow Condensed",sans-serif;text-transform:uppercase;letter-spacing:.03em}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:14px;height:3px;border-radius:2px;background:var(--c)}
+.sw.dash{background:repeating-linear-gradient(90deg,var(--ink-2) 0 4px,transparent 4px 7px);height:2px}
+.sw.yf{height:12px;width:12px;background:repeating-linear-gradient(45deg,var(--yellow) 0 2px,transparent 2px 5px);border:1px solid var(--yellow)}
+.toggle{display:inline-flex;gap:8px;align-items:center;font-size:13px;color:var(--ink-2);cursor:pointer}
+.toggle input{accent-color:var(--ink);width:16px;height:16px}
+#chart{position:relative;width:100%}
+#chart svg{display:block;width:100%;height:auto;overflow:visible}
+#chart text{font-family:"JetBrains Mono",monospace;font-size:11px;fill:var(--ink-3)}
+#chart .dlab{font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:14px;fill:var(--ink);letter-spacing:.04em;text-transform:uppercase}
+#chart .alab{font-family:"JetBrains Mono",monospace;font-size:12px;fill:var(--ink)}
+#chart .ylab{fill:var(--yellow-ink);font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:12px;letter-spacing:.06em}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);font:12px/1.4 "JetBrains Mono",monospace;padding:6px 9px;white-space:nowrap;transform:translate(-50%,calc(-100% - 12px));font-variant-numeric:tabular-nums}
+.tip b{font-family:Barlow,sans-serif;font-weight:600}
+.notes{font-size:13px;color:var(--ink-2);display:grid;gap:4px;margin-top:6px}
+details summary{cursor:pointer;font:700 16px "Barlow Condensed",sans-serif;text-transform:uppercase;letter-spacing:.04em}
+.tbl{overflow-x:auto;margin-top:10px}
+table{border-collapse:collapse;width:100%;font:13px "JetBrains Mono",monospace;font-variant-numeric:tabular-nums}
+th,td{padding:4px 10px;border-bottom:1px solid var(--rule);text-align:right}
+th{font:600 12px "Barlow Condensed",sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+td:nth-child(3),th:nth-child(3){text-align:left;font-family:Barlow,sans-serif}
+tr.yel td{background:color-mix(in srgb,var(--yellow) 18%,transparent)}
+tr.pit td{color:var(--ink-3)}
+:focus-visible{outline:2px solid var(--s1);outline-offset:2px}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1><span class="num">#619</span>Buttonwillow stints</h1>
+      <div class="sub">Lap times by driver · Sun 27 Sep 2026 · Buttonwillow Raceway</div>
+    </div>
+    <div class="meta" id="meta"></div>
+  </header>
+
+  <section class="tiles" id="tiles" aria-label="Driver averages"></section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2>Lap time by lap</h2>
+      <label class="toggle"><input type="checkbox" id="slowToggle"> Also drop laps over 3:30 from averages</label>
+    </div>
+    <div class="legend" id="legend"></div>
+    <div id="chart"></div>
+    <div class="notes" id="notes"></div>
+  </section>
+
+  <section class="panel">
+    <details>
+      <summary>All laps</summary>
+      <div class="tbl"><table id="tbl"></table></div>
+    </details>
+  </section>
+</div>
+
+<script>
+// Lap data transcribed from Race Monitor screenshots.
+// flag: "Y" = yellow lap. Pit laps (driver changes) are detected as > 7:00.
+const RAW = `
+29 3:47.425 64
+30 3:11.373 62
+31 3:03.207 62
+32 2:41.593 60
+33 2:40.161 57
+34 2:44.230 54
+35 2:42.970 54
+36 2:41.984 54
+37 2:54.676 53
+38 2:45.139 51
+39 2:41.168 51
+40 2:43.048 52
+41 2:46.780 50
+42 2:58.522 49
+43 2:56.017 47
+44 2:45.718 48
+45 2:42.900 47
+46 2:47.518 46
+47 2:57.856 46
+48 2:42.057 46
+49 2:38.395 46
+50 2:58.566 45
+51 2:43.850 43
+52 2:50.499 43
+53 3:02.176 43
+54 2:56.980 41
+55 2:50.017 42
+56 2:50.289 43
+57 2:52.165 44
+58 2:48.959 42
+59 2:50.415 40
+60 7:26.219 42
+61 3:05.801 42
+62 2:39.346 43
+63 2:38.315 41
+64 2:33.023 41
+65 2:44.612 41
+66 2:41.356 41
+67 2:37.368 40
+68 2:34.040 40
+69 2:32.099 40
+70 2:33.865 37
+71 2:44.472 34
+73 2:38.964 33
+74 2:32.684 30
+75 2:33.364 29
+76 2:33.158 29
+77 2:31.866 29
+78 2:33.635 28
+79 2:34.556 28
+80 2:39.439 28
+81 2:39.202 28
+82 2:36.559 27
+83 2:31.301 27
+84 2:40.033 27
+85 2:33.623 27
+86 2:34.458 27
+87 2:39.945 26
+88 2:35.279 26
+89 2:30.744 26
+90 2:34.315 26
+91 2:34.587 26
+92 2:34.575 26
+93 2:36.423 26
+94 7:56.680 29
+95 3:41.046 29
+96 2:53.734 29
+97 2:49.255 29
+98 2:45.076 29
+99 2:51.900 29
+100 2:56.344 29
+101 2:55.683 29
+102 2:45.305 29
+103 2:40.194 27
+104 2:54.649 27
+105 2:41.774 27
+106 2:50.611 27
+107 2:38.695 27
+108 2:48.120 26
+109 3:35.883 26
+110 2:36.204 26
+111 2:37.881 25
+112 2:30.810 24
+113 2:35.062 22
+114 2:46.606 22
+115 2:40.414 20
+116 2:47.450 20
+117 3:03.736 20 Y
+118 4:36.807 20 Y
+119 3:35.828 19 Y
+120 4:08.625 19 Y
+122 4:16.142 19
+123 2:48.531 19
+124 2:30.703 19
+125 2:30.920 19
+126 2:34.234 19
+127 7:51.693 21
+128 3:10.622 21
+129 2:40.552 21
+134 2:31.792 21
+135 2:39.317 21
+`;
+// Driver order is assumed to match the roster order. The first change
+// happened somewhere in laps 1-28, which aren't logged yet.
+const DRIVERS = [
+  {name:"Sarah",  c:"--s1", from:1,   to:null},
+  {name:"Thomas", c:"--s2", from:null,to:59},
+  {name:"Coby",   c:"--s3", from:60,  to:93},
+  {name:"Pablo",  c:"--s4", from:94,  to:126},
+  {name:"Elias",  c:"--s5", from:127, to:null, live:true},
+];
+const PIT = 420, SLOW = 210;
+
+const parseT = s => { const [m,r] = s.split(":"); return +m*60 + +r; };
+const fmt = t => { const m = Math.floor(t/60), s = t - m*60; return m + ":" + s.toFixed(3).padStart(6,"0"); };
+const laps = RAW.trim().split("\n").map(l => { const [n,t,p,f] = l.trim().split(/\s+/); return {lap:+n, t:parseT(t), pos:+p, yellow:f==="Y"}; });
+laps.forEach(l => { l.pit = l.t > PIT; });
+
+// Thomas's first logged lap is our first logged lap until earlier data arrives.
+const firstLogged = laps[0].lap;
+DRIVERS[1].from = DRIVERS[1].from ?? firstLogged;
+const lastLap = laps[laps.length-1].lap;
+DRIVERS.forEach(d => { d.to = d.to ?? (d.live ? lastLap : d.to); });
+const driverOf = lap => DRIVERS.find(d => d.from != null && d.to != null && lap >= d.from && lap <= d.to);
+laps.forEach(l => { l.driver = driverOf(l.lap); });
+
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const slowToggle = document.getElementById("slowToggle");
+try { slowToggle.checked = localStorage.getItem("dropSlow") === "1"; } catch(e) {}
+
+function stats(d, dropSlow){
+  const mine = laps.filter(l => l.driver === d);
+  const counted = mine.filter(l => !l.yellow && !l.pit && !(dropSlow && l.t > SLOW));
+  const avg = counted.length ? counted.reduce((a,l)=>a+l.t,0)/counted.length : null;
+  const best = mine.length ? Math.min(...mine.map(l=>l.t)) : null;
+  return {mine, counted, avg, best};
+}
+
+function render(){
+  const dropSlow = slowToggle.checked;
+  const S = DRIVERS.map(d => ({d, ...stats(d, dropSlow)}));
+  const avgs = S.filter(s=>s.avg!=null).map(s=>s.avg);
+  const bestAvg = Math.min(...avgs);
+
+  // Meta
+  const allBest = laps.reduce((a,l)=> l.t<a.t?l:a);
+  document.getElementById("meta").innerHTML =
+    `Last lap ${lastLap} · P${laps[laps.length-1].pos}<br>Best ${fmt(allBest.t)} (L${allBest.lap}, ${allBest.driver.name})`;
+
+  // Tiles
+  document.getElementById("tiles").innerHTML = S.map(s => {
+    const d = s.d;
+    const range = d.name==="Sarah" ? "Laps 1–?" : `Laps ${d.from===firstLogged && d.name==="Thomas" ? "?–" : d.from+"–"}${d.live? d.to+"+" : d.to}`;
+    const tag = d.live ? '<span class="pill live">In car</span>' : (s.avg!=null && s.avg===bestAvg ? '<span class="pill fast">Fastest avg</span>' : "");
+    const avg = s.avg!=null ? `<div class="avg">${fmt(s.avg)}</div>` : `<div class="avg none">Laps 1–28 not logged yet</div>`;
+    const delta = s.avg!=null && s.avg!==bestAvg ? `+${(s.avg-bestAvg).toFixed(3)}s` : (s.avg!=null ? "—" : "");
+    return `<article class="tile" style="--c:var(${d.c})">
+      <div class="name">${d.name}${tag}</div>
+      <div class="label">Avg lap · ${range}</div>
+      ${avg}
+      ${s.avg!=null ? `<dl>
+        <dt>Best</dt><dd>${fmt(s.best)}</dd>
+        <dt>Laps counted</dt><dd>${s.counted.length} / ${s.mine.length}</dd>
+        <dt>Gap to fastest</dt><dd>${delta}</dd>
+      </dl>`:""}
+    </article>`;
+  }).join("");
+
+  // Legend
+  document.getElementById("legend").innerHTML =
+    DRIVERS.map(d=>`<span><i class="sw" style="--c:var(${d.c})"></i>${d.name}</span>`).join("") +
+    `<span><i class="sw dash"></i>Stint average</span><span><i class="sw yf"></i>Yellow flag</span>`;
+
+  drawChart(S, dropSlow);
+  document.getElementById("notes").innerHTML =
+    `<div>Averages leave out yellow laps and driver-change laps (over 7:00)${dropSlow?", and any lap over 3:30":""}. Lap ${laps.filter(l=>l.pit).map(l=>l.lap).join(", ")} were driver changes and sit above the chart.</div>
+     <div>Missing so far: laps 1–28, 130–133. Laps 72 and 121 are not listed in timing.</div>`;
+
+  // Table
+  document.getElementById("tbl").innerHTML = `<thead><tr><th>Lap</th><th>Pos</th><th>Driver</th><th>Time</th><th>Note</th></tr></thead><tbody>` +
+    laps.slice().reverse().map(l=>`<tr class="${l.yellow?"yel":""} ${l.pit?"pit":""}"><td>${l.lap}</td><td>${l.pos}</td><td>${l.driver.name}</td><td>${fmt(l.t)}</td><td>${l.pit?"Driver change":l.yellow?"Yellow":l.t===allBest.t?"Best":""}</td></tr>`).join("") + `</tbody>`;
+}
+
+function drawChart(S, dropSlow){
+  const host = document.getElementById("chart");
+  const W = Math.max(320, host.clientWidth), H = W < 600 ? 340 : 420;
+  const m = {l:48, r:12, t:40, b:30};
+  const iw = W-m.l-m.r, ih = H-m.t-m.b;
+  const x0 = 1, x1 = Math.max(lastLap+2, 140);
+  const yMin = 145, yMax = 240; // 2:25 – 4:00, anything slower is capped
+  const X = n => m.l + (n-x0)/(x1-x0)*iw;
+  const Y = t => m.t + (1 - (Math.min(t,yMax)-yMin)/(yMax-yMin))*ih;
+  const grid = css("--grid"), ink3 = css("--ink-3"), ink2 = css("--ink-2"), panel = css("--panel"), yel = css("--yellow");
+  let g = "";
+  // stint bands
+  S.forEach(({d})=>{
+    if (d.from==null || d.to==null) return;
+    const xa = X(d.from-0.5), xb = X(d.to+0.5);
+    g += `<rect x="${xa}" y="${m.t}" width="${xb-xa}" height="${ih}" fill="${css(d.c)}" fill-opacity="${css("--band-a")}"/>`;
+    g += `<line x1="${xa}" x2="${xa}" y1="${m.t-26}" y2="${m.t+ih}" stroke="${css(d.c)}" stroke-width="2"/>`;
+  });
+  // unlogged region
+  g += `<rect x="${X(0.5)}" y="${m.t}" width="${X(firstLogged-0.5)-X(0.5)}" height="${ih}" fill="url(#hatch)"/>`;
+  g += `<text x="${(X(0.5)+X(firstLogged-0.5))/2}" y="${m.t+ih/2}" text-anchor="middle">${W<600?"not logged":"laps 1–28 not logged"}</text>`;
+  // yellow bands
+  laps.filter(l=>l.yellow).forEach(l=>{
+    g += `<rect x="${X(l.lap-0.5)}" y="${m.t}" width="${X(l.lap+0.5)-X(l.lap-0.5)}" height="${ih}" fill="url(#yhatch)"/>`;
+  });
+  const ys = laps.filter(l=>l.yellow);
+  if (ys.length) g += `<text class="ylab" x="${(X(ys[0].lap-0.5)+X(ys[ys.length-1].lap+0.5))/2}" y="${m.t+ih-6}" text-anchor="middle">YELLOW</text>`;
+  // y grid
+  for (let t=150; t<=yMax; t+=15){
+    g += `<line x1="${m.l}" x2="${m.l+iw}" y1="${Y(t)}" y2="${Y(t)}" stroke="${grid}"/>`;
+    g += `<text x="${m.l-6}" y="${Y(t)+4}" text-anchor="end">${Math.floor(t/60)}:${String(t%60).padStart(2,"0")}${t===yMax?"+":""}</text>`;
+  }
+  // x ticks
+  const step = W<600 ? 20 : 10;
+  for (let n=step; n<x1; n+=step){
+    g += `<line x1="${X(n)}" x2="${X(n)}" y1="${m.t+ih}" y2="${m.t+ih+4}" stroke="${ink3}"/>`;
+    g += `<text x="${X(n)}" y="${m.t+ih+17}" text-anchor="middle">${n}</text>`;
+  }
+  g += `<line x1="${m.l}" x2="${m.l+iw}" y1="${m.t+ih}" y2="${m.t+ih}" stroke="${ink3}"/>`;
+  // lines per stint, broken at missing laps
+  S.forEach(({d, mine})=>{
+    let path = "", prev = null;
+    mine.forEach(l=>{
+      path += (prev!=null && l.lap===prev+1 ? "L" : "M") + X(l.lap).toFixed(1)+","+Y(l.t).toFixed(1);
+      prev = l.lap;
+    });
+    if (path) g += `<path d="${path}" fill="none" stroke="${css(d.c)}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+    mine.filter(l=>l.t>yMax).forEach(l=>{
+      g += `<path d="M${X(l.lap)-5},${Y(l.t)+2}L${X(l.lap)+5},${Y(l.t)+2}L${X(l.lap)},${Y(l.t)-5}Z" fill="${css(d.c)}" stroke="${panel}" stroke-width="2"/>`;
+    });
+  });
+  // yellow lap markers
+  laps.filter(l=>l.yellow).forEach(l=>{
+    g += `<circle cx="${X(l.lap)}" cy="${Y(l.t)}" r="4.5" fill="${yel}" stroke="${panel}" stroke-width="2"/>`;
+  });
+  // averages + direct labels
+  S.forEach(({d, avg})=>{
+    if (d.from==null || d.to==null) return;
+    const xa = X(d.from-0.5)+6;
+    g += `<text class="dlab" x="${xa}" y="${m.t-12}">${d.name}</text>`;
+    if (avg==null) return;
+    const xs = X(Math.max(d.from, firstLogged)-0.5), xe = X(d.to+0.5);
+    g += `<line x1="${xs}" x2="${xe}" y1="${Y(avg)}" y2="${Y(avg)}" stroke="${ink2}" stroke-width="1.5" stroke-dasharray="5 4"/>`;
+    const lx = Math.max(xs+4, m.l+4);
+    g += `<text class="alab" x="${lx}" y="${Y(avg)-6}" paint-order="stroke" stroke="${panel}" stroke-width="4">${W<600?fmt(avg).slice(0,6):"avg "+fmt(avg)}</text>`;
+  });
+  // hover layer
+  g += `<line id="xh" y1="${m.t}" y2="${m.t+ih}" stroke="${ink2}" stroke-width="1" visibility="hidden"/>`;
+  g += `<circle id="xd" r="5" fill="${panel}" stroke-width="2.5" visibility="hidden"/>`;
+  g += `<rect id="hit" x="${m.l}" y="${m.t-30}" width="${iw}" height="${ih+30}" fill="transparent"/>`;
+  host.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Lap time by lap, colored by driver stint">
+    <defs>
+      <pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="1.5" height="6" fill="${grid}"/></pattern>
+      <pattern id="yhatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="2.5" height="6" fill="${yel}" fill-opacity=".45"/></pattern>
+    </defs>${g}</svg><div class="tip" hidden></div>`;
+  const svg = host.querySelector("svg"), tip = host.querySelector(".tip"),
+        xh = svg.getElementById("xh"), xd = svg.getElementById("xd");
+  const byLap = new Map(laps.map(l=>[l.lap,l]));
+  const move = ev => {
+    const r = svg.getBoundingClientRect(), sx = (ev.clientX - r.left) * W / r.width;
+    let n = Math.round(x0 + (sx-m.l)/iw*(x1-x0)), l = byLap.get(n);
+    if (!l) { let best=null; laps.forEach(q=>{ if(best==null||Math.abs(q.lap-n)<Math.abs(best.lap-n)) best=q; }); l = Math.abs(best.lap-n)<=1 ? best : null; }
+    if (!l) { hide(); return; }
+    const cx = X(l.lap), cy = Y(l.t);
+    xh.setAttribute("x1",cx); xh.setAttribute("x2",cx); xh.setAttribute("visibility","visible");
+    xd.setAttribute("cx",cx); xd.setAttribute("cy",cy); xd.setAttribute("stroke",css(l.driver.c)); xd.setAttribute("visibility","visible");
+    tip.hidden = false;
+    tip.style.left = Math.min(Math.max(cx/W*r.width, 80), r.width-80)+"px";
+    tip.style.top = (cy/H*r.height)+"px";
+    tip.innerHTML = `<b>Lap ${l.lap} · ${l.driver.name}</b><br>${fmt(l.t)} · P${l.pos}${l.yellow?" · yellow":""}${l.pit?" · driver change":""}`;
+  };
+  const hide = () => { tip.hidden = true; xh.setAttribute("visibility","hidden"); xd.setAttribute("visibility","hidden"); };
+  const hit = svg.getElementById("hit");
+  hit.addEventListener("pointermove", move); hit.addEventListener("pointerdown", move); hit.addEventListener("pointerleave", hide);
+}
+
+slowToggle.addEventListener("change", ()=>{ try{localStorage.setItem("dropSlow", slowToggle.checked?"1":"0");}catch(e){} render(); });
+let rt; new ResizeObserver(()=>{ clearTimeout(rt); rt=setTimeout(render,60); }).observe(document.getElementById("chart"));
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", render);
+new MutationObserver(render).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+render();
+</script>
