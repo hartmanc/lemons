@@ -6,7 +6,7 @@
   --bg:#f3f4f6; --panel:#ffffff; --ink:#12151a; --ink-2:#4a505a; --ink-3:#7c828c;
   --rule:#dfe2e7; --grid:#e8eaee;
   --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#4a3aa7; --s5:#e87ba4;
-  --yellow:#f2c200; --yellow-ink:#7a5d00; --live:#1a9e55;
+  --yellow:#f2c200; --yellow-ink:#7a5d00; --red:#d03b3b; --red-ink:#a52a2a; --live:#1a9e55;
   --band-a:.07;
 }
 @media (prefers-color-scheme: dark){
@@ -15,7 +15,7 @@
     --bg:#0f1114; --panel:#171a1f; --ink:#f2f3f5; --ink-2:#b4b9c2; --ink-3:#7f8590;
     --rule:#2a2e35; --grid:#23272d;
     --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#9085e9; --s5:#d55181;
-    --yellow:#e0b400; --yellow-ink:#f2d160; --live:#3cc27a; --band-a:.12;
+    --yellow:#e0b400; --yellow-ink:#f2d160; --red:#e05555; --red-ink:#f08a8a; --live:#3cc27a; --band-a:.12;
   }
 }
 :root[data-theme="dark"]{
@@ -23,7 +23,7 @@
   --bg:#0f1114; --panel:#171a1f; --ink:#f2f3f5; --ink-2:#b4b9c2; --ink-3:#7f8590;
   --rule:#2a2e35; --grid:#23272d;
   --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#9085e9; --s5:#d55181;
-  --yellow:#e0b400; --yellow-ink:#f2d160; --live:#3cc27a; --band-a:.12;
+  --yellow:#e0b400; --yellow-ink:#f2d160; --red:#e05555; --red-ink:#f08a8a; --live:#3cc27a; --band-a:.12;
 }
 body{background:var(--bg);color:var(--ink);font:15px/1.45 Barlow,system-ui,sans-serif}
 .wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:20px 48px;display:grid;gap:18px}
@@ -59,6 +59,7 @@ h1 .num{display:inline-block;background:var(--ink);color:var(--bg);padding:0 .22
 .sw{width:14px;height:3px;border-radius:2px;background:var(--c)}
 .sw.dash{background:repeating-linear-gradient(90deg,var(--ink-2) 0 4px,transparent 4px 7px);height:2px}
 .sw.ol{width:10px;height:10px;border-radius:50%;background:var(--panel);border:2px solid var(--ink-2)}
+.sw.rf{height:12px;width:12px;background:repeating-linear-gradient(45deg,var(--red) 0 2px,transparent 2px 5px);border:1px solid var(--red)}
 .sw.yf{height:12px;width:12px;background:repeating-linear-gradient(45deg,var(--yellow) 0 2px,transparent 2px 5px);border:1px solid var(--yellow)}
 .toggle{display:inline-flex;gap:8px;align-items:center;font-size:13px;color:var(--ink-2);cursor:pointer}
 .toggle input{accent-color:var(--ink);width:16px;height:16px}
@@ -83,6 +84,7 @@ th,td{padding:4px 10px;border-bottom:1px solid var(--rule);text-align:right}
 th{font:600 12px "Barlow Condensed",sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
 td:nth-child(3),th:nth-child(3){text-align:left;font-family:Barlow,sans-serif}
 tr.yel td{background:color-mix(in srgb,var(--yellow) 18%,transparent)}
+tr.red td{background:color-mix(in srgb,var(--red) 16%,transparent)}
 tr.pit td{color:var(--ink-3)}
 :focus-visible{outline:2px solid var(--s1);outline-offset:2px}
 </style>
@@ -127,6 +129,7 @@ tr.pit td{color:var(--ink-3)}
 <script>
 // Lap data transcribed from Race Monitor screenshots.
 // flag: "Y" = yellow lap, "C" = checkered-flag lap (day 1 ended under yellow),
+// "R" = red flag (lap 185: a Ford Pinto rolled over at Star Mazda just after Thomas went out),
 // "O" = overnight lap from the day 1 flag to the first crossing on day 2 (14:55:46). Pit laps (driver changes) are detected as > 7:00.
 const RAW = `
 29 3:47.425 64
@@ -283,7 +286,7 @@ const RAW = `
 182 3:06.533 19
 183 3:04.903 19
 184 7:40.289 20
-185 20:25.845 19
+185 20:25.845 19 R
 186 2:46.242 19
 187 2:45.247 19
 188 2:40.065 19
@@ -315,8 +318,8 @@ const PIT = 420, SIGMAS = 2, FIELD = 105;
 const parseT = s => { const [m,r] = s.split(":"); return +m*60 + +r; };
 const fmt = t => { const m = Math.floor(t/60), s = t - m*60; return m + ":" + s.toFixed(3).padStart(6,"0"); };
 const fmtShort = t => fmt(t).slice(0, fmt(t).length-2);
-const laps = RAW.trim().split("\n").map(l => { const [n,t,p,f] = l.trim().split(/\s+/); return {lap:+n, t:parseT(t), pos:+p, yellow:f==="Y", check:f==="C", overnight:f==="O"}; });
-laps.forEach(l => { l.pit = !l.overnight && l.t > PIT; });
+const laps = RAW.trim().split("\n").map(l => { const [n,t,p,f] = l.trim().split(/\s+/); return {lap:+n, t:parseT(t), pos:+p, yellow:f==="Y", check:f==="C", overnight:f==="O", red:f==="R"}; });
+laps.forEach(l => { l.pit = !l.overnight && !l.red && l.t > PIT; });
 
 const firstLogged = laps[0].lap;
 const lastLap = laps[laps.length-1].lap;
@@ -330,7 +333,7 @@ STINTS.forEach(s => {
 });
 const stintOf = lap => STINTS.find(s => s.to != null && lap >= s.from && lap <= s.to);
 laps.forEach(l => { l.driver = stintOf(l.lap); });
-const excluded = l => l.yellow || l.pit || l.check || l.overnight;
+const excluded = l => l.yellow || l.pit || l.check || l.overnight || l.red;
 
 const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 const slowToggle = document.getElementById("slowToggle");
@@ -413,18 +416,18 @@ function render(){
 
   document.getElementById("legend").innerHTML =
     Object.values(DRIVERS).map(d=>`<span><i class="sw" style="--c:var(${d.c})"></i>${d.name}</span>`).join("") +
-    `<span><i class="sw dash"></i>Stint average</span><span><i class="sw yf"></i>Double yellow</span><span><i class="sw ol"></i>Outlier (dropped)</span>`;
+    `<span><i class="sw dash"></i>Stint average</span><span><i class="sw yf"></i>Double yellow</span><span><i class="sw rf"></i>Red flag</span><span><i class="sw ol"></i>Outlier (dropped)</span>`;
 
   drawChart(S, dropSlow);
   drawDist(D);
   document.getElementById("notes").innerHTML =
-    `<div>Averages leave out double-yellow laps, the overnight lap, and laps over 7:00 (laps ${laps.filter(l=>l.pit).map(l=>l.lap).join(", ")}: driver changes and stops, drawn at the top of the chart)${dropSlow?". Outlier laps are also dropped: anything more than 2 standard deviations slower than the mean for that stint (hollow markers). Dropped: "+laps.filter(l=>l.outlier).map(l=>l.lap).join(", "):""}.</div>
+    `<div>Averages leave out double-yellow laps, the red-flag lap (${laps.filter(l=>l.red).map(l=>l.lap).join(", ")}), the overnight lap, and driver-change laps over 7:00 (${laps.filter(l=>l.pit).map(l=>l.lap).join(", ")}). Laps over 4:00 are drawn at the top of the chart${dropSlow?". Outlier laps are also dropped: anything more than 2 standard deviations slower than the mean for that stint (hollow markers). Dropped: "+laps.filter(l=>l.outlier).map(l=>l.lap).join(", "):""}.</div>
      <div>Day 1 laps 1–28 aren't available in timing, so Sarah's day 1 stint and Thomas's first laps are missing. Laps 72 and 121 are not listed in timing.</div>
      <div>Stint time adds up each stint's laps, starting with the driver-change lap. + means part of the stint is missing (not in timing, inside the overnight lap, or still running). ≈ means a missing lap was filled in with that stint's median lap. *Sarah's day 1 time is laps 1–28 from the 8-hour race length, and includes the start of Thomas's stint.</div>`;
 
   // Table
   document.getElementById("tbl").innerHTML = `<thead><tr><th>Lap</th><th>Pos</th><th>Driver</th><th>Time</th><th>Note</th></tr></thead><tbody>` +
-    laps.slice().reverse().map(l=>`<tr class="${l.yellow?"yel":""} ${l.pit||l.overnight?"pit":""}"><td>${l.lap}</td><td>${l.pos}</td><td>${l.driver.name}</td><td>${fmt(l.t)}</td><td>${l.overnight?"Overnight":l.pit?"Over 7:00 (stop)":l.check?"Checkered (under double yellow)":l.yellow?"Double yellow":l.outlier?"Outlier (>2σ)":l.t===allBest.t?"Best":""}</td></tr>`).join("") + `</tbody>`;
+    laps.slice().reverse().map(l=>`<tr class="${l.yellow?"yel":""} ${l.pit||l.overnight?"pit":""} ${l.red?"red":""}"><td>${l.lap}</td><td>${l.pos}</td><td>${l.driver.name}</td><td>${fmt(l.t)}</td><td>${l.overnight?"Overnight":l.red?"Red flag (Pinto rollover, Star Mazda)":l.pit?"Driver change":l.check?"Checkered (under double yellow)":l.yellow?"Double yellow":l.outlier?"Outlier (>2σ)":l.t===allBest.t?"Best":""}</td></tr>`).join("") + `</tbody>`;
 }
 
 function drawChart(S, dropSlow){
@@ -464,6 +467,12 @@ function drawChart(S, dropSlow){
   });
   const ygroups = [];
   laps.filter(l=>l.yellow).forEach(l=>{ const gp = ygroups[ygroups.length-1]; if (gp && l.lap-gp[1] <= 2) gp[1] = l.lap; else ygroups.push([l.lap,l.lap]); });
+  // red flag laps
+  laps.filter(l=>l.red).forEach(l=>{
+    const cx = (X(l.lap-0.5)+X(l.lap+0.5))/2;
+    bands.forEach(([y,h])=>{ g += `<rect x="${X(l.lap-0.5)}" y="${y}" width="${X(l.lap+0.5)-X(l.lap-0.5)}" height="${h}" fill="url(#rhatch)"/>`; });
+    g += `<text class="ylab" style="fill:var(--red-ink)" x="${cx}" y="${m.t+ih-6}" text-anchor="middle"><tspan x="${cx}" dy="-14">RED</tspan><tspan x="${cx}" dy="14">FLAG</tspan></text>`;
+  });
   ygroups.forEach(([a,b])=>{ g += `<text class="ylab" x="${(X(a-0.5)+X(b+0.5))/2}" y="${m.t+ih-6}" text-anchor="middle"><tspan x="${(X(a-0.5)+X(b+0.5))/2}" dy="-14">DOUBLE</tspan><tspan x="${(X(a-0.5)+X(b+0.5))/2}" dy="14">YELLOW</tspan></text>`; });
   // checkered lap
   laps.filter(l=>l.check).forEach(l=>{
@@ -538,6 +547,7 @@ function drawChart(S, dropSlow){
     <defs>
       <pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="1.5" height="6" fill="${grid}"/></pattern>
       <pattern id="checker" width="6" height="6" patternUnits="userSpaceOnUse"><rect width="3" height="3" fill="${ink2}" fill-opacity=".5"/><rect x="3" y="3" width="3" height="3" fill="${ink2}" fill-opacity=".5"/></pattern>
+      <pattern id="rhatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="2.5" height="6" fill="${css("--red")}" fill-opacity=".45"/></pattern>
       <pattern id="yhatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="2.5" height="6" fill="${yel}" fill-opacity=".45"/></pattern>
     </defs>${g}</svg><div class="tip" hidden></div>`;
   const svg = host.querySelector("svg"), tip = host.querySelector(".tip"),
@@ -555,7 +565,7 @@ function drawChart(S, dropSlow){
     tip.hidden = false;
     tip.style.left = Math.min(Math.max(cx/W*r.width, 80), r.width-80)+"px";
     tip.style.top = (cy/H*r.height)+"px";
-    tip.innerHTML = `<b>Lap ${l.lap} · ${l.driver.name}</b><br>${fmt(l.t)} · P${l.pos}${l.yellow?" · double yellow":""}${l.pit?" · stop":""}${l.overnight?" · overnight":""}${l.check?" · checkered":""}`;
+    tip.innerHTML = `<b>Lap ${l.lap} · ${l.driver.name}</b><br>${fmt(l.t)} · P${l.pos}${l.yellow?" · double yellow":""}${l.pit?" · driver change":""}${l.red?" · red flag":""}${l.overnight?" · overnight":""}${l.check?" · checkered":""}`;
   };
   const hide = () => { tip.hidden = true; xh.setAttribute("visibility","hidden"); xd.setAttribute("visibility","hidden"); xp.setAttribute("visibility","hidden"); };
   const hit = svg.getElementById("hit");
