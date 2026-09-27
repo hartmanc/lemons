@@ -333,17 +333,17 @@ function render(){
   // Legend
   document.getElementById("legend").innerHTML =
     DRIVERS.map(d=>`<span><i class="sw" style="--c:var(${d.c})"></i>${d.name}</span>`).join("") +
-    `<span><i class="sw dash"></i>Stint average</span><span><i class="sw yf"></i>Yellow flag</span><span><i class="sw ol"></i>Outlier (dropped)</span>`;
+    `<span><i class="sw dash"></i>Stint average</span><span><i class="sw yf"></i>Double yellow</span><span><i class="sw ol"></i>Outlier (dropped)</span>`;
 
   drawChart(S, dropSlow);
   drawDist(S);
   document.getElementById("notes").innerHTML =
-    `<div>Averages leave out yellow laps and driver-change laps (over 7:00)${dropSlow?". Outlier laps are also dropped: anything more than 2 standard deviations slower than that driver's own mean (hollow markers). Dropped: "+laps.filter(l=>l.outlier).map(l=>l.lap).join(", "):""}. Lap ${laps.filter(l=>l.pit).map(l=>l.lap).join(", ")} were driver changes and sit above the chart.</div>
+    `<div>Averages leave out double-yellow laps and driver-change laps (over 7:00)${dropSlow?". Outlier laps are also dropped: anything more than 2 standard deviations slower than that driver's own mean (hollow markers). Dropped: "+laps.filter(l=>l.outlier).map(l=>l.lap).join(", "):""}. Lap ${laps.filter(l=>l.pit).map(l=>l.lap).join(", ")} were driver changes and sit above the chart.</div>
      <div>Laps 1–28 aren't available in timing, so Sarah's stint and Thomas's first laps are missing. Laps 72 and 121 are not listed in timing.</div>`;
 
   // Table
   document.getElementById("tbl").innerHTML = `<thead><tr><th>Lap</th><th>Pos</th><th>Driver</th><th>Time</th><th>Note</th></tr></thead><tbody>` +
-    laps.slice().reverse().map(l=>`<tr class="${l.yellow?"yel":""} ${l.pit?"pit":""}"><td>${l.lap}</td><td>${l.pos}</td><td>${l.driver.name}</td><td>${fmt(l.t)}</td><td>${l.pit?"Driver change":l.check?"Checkered (under yellow)":l.yellow?"Yellow":l.outlier?"Outlier (>2σ)":l.t===allBest.t?"Best":""}</td></tr>`).join("") + `</tbody>`;
+    laps.slice().reverse().map(l=>`<tr class="${l.yellow?"yel":""} ${l.pit?"pit":""}"><td>${l.lap}</td><td>${l.pos}</td><td>${l.driver.name}</td><td>${fmt(l.t)}</td><td>${l.pit?"Driver change":l.check?"Checkered (under double yellow)":l.yellow?"Double yellow":l.outlier?"Outlier (>2σ)":l.t===allBest.t?"Best":""}</td></tr>`).join("") + `</tbody>`;
 }
 
 function drawChart(S, dropSlow){
@@ -378,7 +378,7 @@ function drawChart(S, dropSlow){
   });
   const ygroups = [];
   laps.filter(l=>l.yellow).forEach(l=>{ const gp = ygroups[ygroups.length-1]; if (gp && l.lap-gp[1] <= 2) gp[1] = l.lap; else ygroups.push([l.lap,l.lap]); });
-  ygroups.forEach(([a,b])=>{ g += `<text class="ylab" x="${(X(a-0.5)+X(b+0.5))/2}" y="${m.t+ih-6}" text-anchor="middle">YELLOW</text>`; });
+  ygroups.forEach(([a,b])=>{ g += `<text class="ylab" x="${(X(a-0.5)+X(b+0.5))/2}" y="${m.t+ih-6}" text-anchor="middle"><tspan x="${(X(a-0.5)+X(b+0.5))/2}" dy="-14">DOUBLE</tspan><tspan x="${(X(a-0.5)+X(b+0.5))/2}" dy="14">YELLOW</tspan></text>`; });
   // checkered lap
   laps.filter(l=>l.check).forEach(l=>{
     bands.forEach(([y,h])=>{ g += `<rect x="${X(l.lap-0.5)}" y="${y}" width="${X(l.lap+0.5)-X(l.lap-0.5)}" height="${h}" fill="url(#checker)"/>`; });
@@ -469,7 +469,7 @@ function drawChart(S, dropSlow){
     tip.hidden = false;
     tip.style.left = Math.min(Math.max(cx/W*r.width, 80), r.width-80)+"px";
     tip.style.top = (cy/H*r.height)+"px";
-    tip.innerHTML = `<b>Lap ${l.lap} · ${l.driver.name}</b><br>${fmt(l.t)} · P${l.pos}${l.yellow?" · yellow":""}${l.pit?" · driver change":""}${l.check?" · checkered":""}`;
+    tip.innerHTML = `<b>Lap ${l.lap} · ${l.driver.name}</b><br>${fmt(l.t)} · P${l.pos}${l.yellow?" · double yellow":""}${l.pit?" · driver change":""}${l.check?" · checkered":""}`;
   };
   const hide = () => { tip.hidden = true; xh.setAttribute("visibility","hidden"); xd.setAttribute("visibility","hidden"); xp.setAttribute("visibility","hidden"); };
   const hit = svg.getElementById("hit");
