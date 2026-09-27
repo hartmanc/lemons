@@ -37,11 +37,12 @@ h1 .num{display:inline-block;background:var(--ink);color:var(--bg);padding:0 .22
 @media (max-width:900px){.tiles{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:560px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .tile{background:var(--panel);border:1px solid var(--rule);border-top:4px solid var(--c);padding:10px 12px 12px;display:grid;gap:2px;align-content:start}
-.tile .name{display:flex;align-items:center;justify-content:space-between;gap:6px;font:700 20px "Barlow Condensed",sans-serif;text-transform:uppercase;letter-spacing:.03em}
+.tile .name{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px;font:700 20px "Barlow Condensed",sans-serif;text-transform:uppercase;letter-spacing:.03em}
 .tile .avg{font:500 26px/1.1 "JetBrains Mono",monospace;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 .tile .avg.none{font-size:15px;color:var(--ink-3);font-family:Barlow,sans-serif;letter-spacing:0;padding-block:6px}
 .tile dl{display:grid;grid-template-columns:auto 1fr;gap:1px 10px;margin:6px 0 0;font-size:13px}
 .tile dt{color:var(--ink-3)} .tile dd{margin:0;text-align:right;font:13px "JetBrains Mono",monospace;font-variant-numeric:tabular-nums}
+.tags{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end}
 .pill{font:600 11px Barlow,sans-serif;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:999px;border:1px solid currentColor;white-space:nowrap}
 .pill.live{color:var(--live)} .pill.live::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor;margin-right:5px;vertical-align:1px}
 .pill.fast{color:var(--ink-2)}
@@ -282,7 +283,11 @@ function render(){
   document.getElementById("tiles").innerHTML = S.map(s => {
     const d = s.d;
     const range = d.name==="Sarah" ? "Laps 1–?" : `Laps ${d.from===firstLogged && d.name==="Thomas" ? "?–" : d.from+"–"}${d.live? d.to+"+" : d.to}`;
-    const tag = d.live ? '<span class="pill live">In car</span>' : (s.avg!=null && s.avg===bestAvg ? '<span class="pill fast">Fastest avg</span>' : "");
+    const tag = '<span class="tags">' + [
+      d.live && '<span class="pill live">In car</span>',
+      s.avg!=null && s.avg===bestAvg && '<span class="pill fast">Fastest avg</span>',
+      s.best!=null && s.best===allBest.t && '<span class="pill fast">Fastest lap</span>',
+    ].filter(Boolean).join("") + '</span>';
     const avg = s.avg!=null ? `<div class="avg">${fmt(s.avg)}</div>` : `<div class="avg none">No timing data (laps 1–28 not in Race Monitor)</div>`;
     const delta = s.avg!=null && s.avg!==bestAvg ? `+${(s.avg-bestAvg).toFixed(3)}s` : (s.avg!=null ? "—" : "");
     return `<article class="tile" style="--c:var(${d.c})">
