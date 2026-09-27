@@ -134,7 +134,7 @@ tr.pit td{color:var(--ink-3)}
 <script>
 // Lap data transcribed from Race Monitor screenshots.
 // flag: "Y" = yellow lap, "C" = checkered-flag lap (day 1 ended under yellow),
-// "B" = black flag (lap 225), "D" = driver change shorter than 7:00 (238, 263),
+// "B" = black flag (laps 225, 237), "D" = driver change shorter than 7:00 (238, 263),
 // "R" = red flag (lap 185: a Ford Pinto rolled over at Star Mazda just after Thomas went out),
 // "O" = overnight lap from the day 1 flag to the first crossing on day 2 (14:55:46). Pit laps (driver changes) are detected as > 7:00.
 const RAW = `
@@ -340,7 +340,7 @@ const RAW = `
 234 2:32.109 16
 235 2:34.445 16
 236 2:54.991 16
-237 5:23.589 16
+237 5:23.589 16 B
 238 6:54.649 17 D
 239 3:11.736 17
 240 2:34.883 16
@@ -527,7 +527,7 @@ function render(){
   drawChart(S, dropSlow);
   drawDist(D);
   document.getElementById("notes").innerHTML =
-    `<div>Averages leave out double-yellow laps, the red-flag lap (${laps.filter(l=>l.red).map(l=>l.lap).join(", ")}), ${blackToggle.checked ? "" : `the black-flag lap (${laps.filter(l=>l.black).map(l=>l.lap).join(", ")}), `}the overnight lap, and driver-change laps (${laps.filter(l=>l.pit).map(l=>l.lap).join(", ")}). Laps over 4:00 are drawn at the top of the chart${dropSlow?". Outlier laps are also dropped: anything more than 2 standard deviations slower than the mean for that stint (hollow markers). Dropped: "+laps.filter(l=>l.outlier).map(l=>l.lap).join(", "):""}.</div>
+    `<div>Averages leave out double-yellow laps, the red-flag lap (${laps.filter(l=>l.red).map(l=>l.lap).join(", ")}), ${blackToggle.checked ? "" : `the black-flag laps (${laps.filter(l=>l.black).map(l=>l.lap).join(", ")}), `}the overnight lap, and driver-change laps (${laps.filter(l=>l.pit).map(l=>l.lap).join(", ")}). Laps over 4:00 are drawn at the top of the chart${dropSlow?". Outlier laps are also dropped: anything more than 2 standard deviations slower than the mean for that stint (hollow markers). Dropped: "+laps.filter(l=>l.outlier).map(l=>l.lap).join(", "):""}.</div>
      <div>Day 1 laps 1–28 aren't available in timing, so Sarah's day 1 stint and Thomas's first laps are missing. Laps ${missingLaps.join(", ")} are missing (not listed in timing or not captured); stint times fill them with the stint median.</div>
      <div>Stint time adds up each stint's laps, starting with the driver-change lap. + means part of the stint is missing (not in timing, inside the overnight lap, or still running). ≈ means a missing lap was filled in with that stint's median lap. *Sarah's day 1 time is laps 1–28 from the 8-hour race length, and includes the start of Thomas's stint.</div>`;
 
@@ -580,10 +580,16 @@ function drawChart(S, dropSlow){
     g += `<text class="ylab" style="fill:var(--red-ink)" x="${cx}" y="${m.t+ih-6}" text-anchor="middle"><tspan x="${cx}" dy="-14">RED</tspan><tspan x="${cx}" dy="14">FLAG</tspan></text>`;
   });
   // black flag laps
+  // nearby black flags share one label so they don't collide
+  const bgroups = [];
   laps.filter(l=>l.black).forEach(l=>{
-    const cx = (X(l.lap-0.5)+X(l.lap+0.5))/2;
     bands.forEach(([y,h])=>{ g += `<rect x="${X(l.lap-0.5)}" y="${y}" width="${X(l.lap+0.5)-X(l.lap-0.5)}" height="${h}" fill="url(#bhatch)"/>`; });
-    g += `<text class="ylab" style="fill:var(--ink)" x="${cx}" y="${m.t+ih-6}" text-anchor="middle"><tspan x="${cx}" dy="-14">BLACK</tspan><tspan x="${cx}" dy="14">FLAG</tspan></text>`;
+    const gp = bgroups[bgroups.length-1];
+    if (gp && l.lap - gp[gp.length-1] <= 20) gp.push(l.lap); else bgroups.push([l.lap]);
+  });
+  bgroups.forEach(gp=>{
+    const cx = (X(gp[0])+X(gp[gp.length-1]))/2;
+    g += `<text class="ylab" style="fill:var(--ink)" x="${cx}" y="${m.t+ih-6}" text-anchor="middle"><tspan x="${cx}" dy="-14">BLACK</tspan><tspan x="${cx}" dy="14">FLAG${gp.length>1?"S":""}</tspan></text>`;
   });
   ygroups.forEach(([a,b])=>{ g += `<text class="ylab" x="${(X(a-0.5)+X(b+0.5))/2}" y="${m.t+ih-6}" text-anchor="middle"><tspan x="${(X(a-0.5)+X(b+0.5))/2}" dy="-14">DOUBLE</tspan><tspan x="${(X(a-0.5)+X(b+0.5))/2}" dy="14">YELLOW</tspan></text>`; });
   // checkered lap
