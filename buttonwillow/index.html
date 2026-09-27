@@ -62,6 +62,7 @@ h1 .num{display:inline-block;background:var(--ink);color:var(--bg);padding:0 .22
 .sw.bf{height:12px;width:12px;background:repeating-linear-gradient(45deg,var(--ink-2) 0 2px,transparent 2px 5px);border:1px solid var(--ink-2)}
 .sw.rf{height:12px;width:12px;background:repeating-linear-gradient(45deg,var(--red) 0 2px,transparent 2px 5px);border:1px solid var(--red)}
 .sw.yf{height:12px;width:12px;background:repeating-linear-gradient(45deg,var(--yellow) 0 2px,transparent 2px 5px);border:1px solid var(--yellow)}
+.toggles{display:flex;flex-wrap:wrap;gap:4px 18px}
 .toggle{display:inline-flex;gap:8px;align-items:center;font-size:13px;color:var(--ink-2);cursor:pointer}
 .toggle input{accent-color:var(--ink);width:16px;height:16px}
 #chart{position:relative;width:100%}
@@ -104,7 +105,10 @@ tr.pit td{color:var(--ink-3)}
   <section class="panel">
     <div class="panel-head">
       <h2>Lap time &amp; overall position by lap</h2>
-      <label class="toggle"><input type="checkbox" id="slowToggle" checked> Drop outlier laps (over 2σ) from averages</label>
+      <div class="toggles">
+        <label class="toggle"><input type="checkbox" id="slowToggle" checked> Drop outlier laps (over 2σ) from averages</label>
+        <label class="toggle"><input type="checkbox" id="blackToggle" checked> Count black-flag laps in averages</label>
+      </div>
     </div>
     <div class="legend" id="legend"></div>
     <div id="chart"></div>
@@ -371,6 +375,8 @@ const excluded = l => l.yellow || l.pit || l.check || l.overnight || l.red || l.
 
 const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 const slowToggle = document.getElementById("slowToggle");
+const blackToggle = document.getElementById("blackToggle");
+try { const v = localStorage.getItem("countBlack"); if (v != null) blackToggle.checked = v === "1"; } catch(e) {}
 try { const v = localStorage.getItem("dropOutliers"); if (v != null) slowToggle.checked = v === "1"; } catch(e) {}
 
 const meanOf = ls => ls.length ? ls.reduce((a,l)=>a+l.t,0)/ls.length : null;
@@ -382,7 +388,10 @@ function stats(st, dropSlow){
   const clean = mine.filter(l => !excluded(l));
   const cut = meanOf(clean) + SIGMAS*(sdOf(clean) ?? 0);
   mine.forEach(l => { l.outlier = !excluded(l) && clean.length > 2 && l.t > cut; });
-  const counted = dropSlow ? clean.filter(l => !l.outlier) : clean;
+  // Black-flag laps are the driver's own time lost, so they can count toward the
+  // average. They never set the outlier cut and are never dropped as outliers.
+  const black = blackToggle.checked ? mine.filter(l => l.black) : [];
+  const counted = (dropSlow ? clean.filter(l => !l.outlier) : clean).concat(black);
   // Stint time: every lap in the stint, driver-change lap included. Laps missing
   // from timing (e.g. 72, 121) are filled with the stint's median lap.
   let secs = null, approx = false;
@@ -456,7 +465,7 @@ function render(){
   drawChart(S, dropSlow);
   drawDist(D);
   document.getElementById("notes").innerHTML =
-    `<div>Averages leave out double-yellow laps, the red-flag lap (${laps.filter(l=>l.red).map(l=>l.lap).join(", ")}), the black-flag lap (${laps.filter(l=>l.black).map(l=>l.lap).join(", ")}), the overnight lap, and driver-change laps over 7:00 (${laps.filter(l=>l.pit).map(l=>l.lap).join(", ")}). Laps over 4:00 are drawn at the top of the chart${dropSlow?". Outlier laps are also dropped: anything more than 2 standard deviations slower than the mean for that stint (hollow markers). Dropped: "+laps.filter(l=>l.outlier).map(l=>l.lap).join(", "):""}.</div>
+    `<div>Averages leave out double-yellow laps, the red-flag lap (${laps.filter(l=>l.red).map(l=>l.lap).join(", ")}), ${blackToggle.checked ? "" : `the black-flag lap (${laps.filter(l=>l.black).map(l=>l.lap).join(", ")}), `}the overnight lap, and driver-change laps over 7:00 (${laps.filter(l=>l.pit).map(l=>l.lap).join(", ")}). Laps over 4:00 are drawn at the top of the chart${dropSlow?". Outlier laps are also dropped: anything more than 2 standard deviations slower than the mean for that stint (hollow markers). Dropped: "+laps.filter(l=>l.outlier).map(l=>l.lap).join(", "):""}.</div>
      <div>Day 1 laps 1–28 aren't available in timing, so Sarah's day 1 stint and Thomas's first laps are missing. Laps ${missingLaps.join(", ")} are missing (not listed in timing or not captured); stint times fill them with the stint median.</div>
      <div>Stint time adds up each stint's laps, starting with the driver-change lap. + means part of the stint is missing (not in timing, inside the overnight lap, or still running). ≈ means a missing lap was filled in with that stint's median lap. *Sarah's day 1 time is laps 1–28 from the 8-hour race length, and includes the start of Thomas's stint.</div>`;
 
@@ -662,6 +671,7 @@ function drawDist(S){
   host.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Lap time histograms per driver on a shared lap-time axis">${g}</svg>`;
 }
 
+blackToggle.addEventListener("change", ()=>{ try{localStorage.setItem("countBlack", blackToggle.checked?"1":"0");}catch(e){} render(); });
 slowToggle.addEventListener("change", ()=>{ try{localStorage.setItem("dropOutliers", slowToggle.checked?"1":"0");}catch(e){} render(); });
 let rt; new ResizeObserver(()=>{ clearTimeout(rt); rt=setTimeout(render,60); }).observe(document.getElementById("chart"));
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change", render);
