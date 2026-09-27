@@ -37,7 +37,7 @@ h1 .num{display:inline-block;background:var(--ink);color:var(--bg);padding:0 .22
 @media (max-width:900px){.tiles{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:560px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .tile{background:var(--panel);border:1px solid var(--rule);border-top:4px solid var(--c);padding:10px 12px 12px;display:grid;gap:2px;align-content:start}
-.tile .name{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px;font:700 20px "Barlow Condensed",sans-serif;text-transform:uppercase;letter-spacing:.03em}
+.tile .name{display:grid;gap:4px;font:700 20px "Barlow Condensed",sans-serif;text-transform:uppercase;letter-spacing:.03em}
 .tile .avg{font:500 26px/1.1 "JetBrains Mono",monospace;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 .tile .avg.none{font-size:15px;color:var(--ink-3);font-family:Barlow,sans-serif;letter-spacing:0;padding-block:6px}
 .tile dl{display:grid;grid-template-columns:auto 1fr;gap:1px 10px;margin:6px 0 0;font-size:13px}
@@ -47,7 +47,7 @@ h1 .num{display:inline-block;background:var(--ink);color:var(--bg);padding:0 .22
 .tile .stint b{font:500 13px "JetBrains Mono",monospace;font-variant-numeric:tabular-nums}
 .tile .dl-head{font:600 11px "Barlow Condensed",sans-serif;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
 .tile dt{color:var(--ink-3)} .tile dd{margin:0;white-space:nowrap;text-align:right;font:13px "JetBrains Mono",monospace;font-variant-numeric:tabular-nums}
-.tags{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end}
+.tags{display:flex;flex-wrap:wrap;gap:4px;min-height:20px;font-size:0}
 .pill{font:600 11px Barlow,sans-serif;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:999px;border:1px solid currentColor;white-space:nowrap}
 .pill.live{color:var(--live)} .pill.live::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor;margin-right:5px;vertical-align:1px}
 .pill.fast{color:var(--ink-2)}
@@ -134,7 +134,7 @@ tr.pit td{color:var(--ink-3)}
 <script>
 // Lap data transcribed from Race Monitor screenshots.
 // flag: "Y" = yellow lap, "C" = checkered-flag lap (day 1 ended under yellow),
-// "B" = black flag (lap 225),
+// "B" = black flag (lap 225), "D" = driver change shorter than 7:00 (238, 263),
 // "R" = red flag (lap 185: a Ford Pinto rolled over at Star Mazda just after Thomas went out),
 // "O" = overnight lap from the day 1 flag to the first crossing on day 2 (14:55:46). Pit laps (driver changes) are detected as > 7:00.
 const RAW = `
@@ -329,6 +329,66 @@ const RAW = `
 223 2:30.357 16
 224 2:50.177 16
 225 5:46.968 16 B
+226 2:31.251 16
+227 2:48.752 16
+228 2:35.412 16
+229 2:29.956 16
+230 2:31.605 16
+231 2:33.452 16
+232 2:38.348 16
+233 2:31.929 16
+234 2:32.109 16
+235 2:34.445 16
+236 2:54.991 16
+237 5:23.589 16
+238 6:54.649 17 D
+239 3:11.736 17
+240 2:34.883 16
+241 2:33.524 16
+242 2:44.297 16
+243 2:32.471 16
+244 2:30.221 16
+245 2:35.875 16
+246 2:31.474 16
+247 2:32.532 16
+248 2:32.211 16
+249 2:33.346 16
+250 2:32.427 16
+251 2:37.373 16
+252 2:42.400 16
+253 2:36.377 16
+254 2:32.138 16
+255 2:33.534 16
+256 2:32.549 16
+257 2:41.828 16
+258 2:32.227 15
+259 2:32.188 15
+260 2:39.264 15
+261 2:34.433 15
+262 2:37.989 15
+263 6:18.892 15 D
+264 3:08.795 15
+265 2:42.019 15
+266 2:34.431 15
+268 2:31.875 15
+269 2:37.180 15
+270 2:33.185 15
+272 2:34.056 15
+273 2:34.127 15
+274 2:37.602 15
+275 2:36.191 15
+276 2:41.175 15
+277 2:37.378 15
+278 2:38.776 15
+279 2:36.314 15
+280 2:33.484 15
+281 2:34.727 15
+282 2:32.932 15
+283 2:31.253 15
+284 2:37.509 15
+285 2:35.999 15
+286 2:31.576 15
+287 2:34.197 15
 `;
 // Driver order on day 1 is assumed to match the roster order. The first change
 // happened somewhere in laps 1-28, which aren't in timing.
@@ -348,15 +408,17 @@ const STINTS = [
   {driver:"Elias",  day:1, from:127,  to:158},
   {driver:"Sarah",  day:2, from:159,  to:183},
   {driver:"Thomas", day:2, from:184,  to:208},
-  {driver:"Elias",  day:2, from:209,  to:null, live:true},
+  {driver:"Elias",  day:2, from:209,  to:237},
+  {driver:"Pablo",  day:2, from:238,  to:262},
+  {driver:"Coby",   day:2, from:263,  to:null, live:true},
 ];
-const PIT = 420, SIGMAS = 2, FIELD = 105;
+const PIT = 420, SIGMAS = 2, FIELD = 105, FINISHED = true;
 
 const parseT = s => { const [m,r] = s.split(":"); return +m*60 + +r; };
 const fmt = t => { const m = Math.floor(t/60), s = t - m*60; return m + ":" + s.toFixed(3).padStart(6,"0"); };
 const fmtShort = t => fmt(t).slice(0, fmt(t).length-2);
-const laps = RAW.trim().split("\n").map(l => { const [n,t,p,f] = l.trim().split(/\s+/); return {lap:+n, t:parseT(t), pos:+p, yellow:f==="Y", check:f==="C", overnight:f==="O", red:f==="R", black:f==="B"}; });
-laps.forEach(l => { l.pit = !l.overnight && !l.red && !l.black && l.t > PIT; });
+const laps = RAW.trim().split("\n").map(l => { const [n,t,p,f] = l.trim().split(/\s+/); return {lap:+n, t:parseT(t), pos:+p, yellow:f==="Y", check:f==="C", overnight:f==="O", red:f==="R", black:f==="B", change:f==="D"}; });
+laps.forEach(l => { l.pit = l.change || (!l.overnight && !l.red && !l.black && l.t > PIT); });
 
 const firstLogged = laps[0].lap;
 const lastLap = laps[laps.length-1].lap;
@@ -403,7 +465,7 @@ function stats(st, dropSlow){
   }
   const best = mine.length ? Math.min(...mine.map(l=>l.t)) : null;
   return {d: st, mine, counted, avg: meanOf(counted), sd: sdOf(counted), best, secs, approx,
-          partial: st.from === firstLogged || mine.some(l=>l.overnight) || (st.live)};
+          partial: st.from === firstLogged || mine.some(l=>l.overnight) || (st.live && !FINISHED)};
 }
 
 function render(){
@@ -422,7 +484,7 @@ function render(){
   const lastL = laps[laps.length-1];
 
   document.getElementById("meta").innerHTML =
-    `Day 2 · Lap ${lastLap} · P${lastL.pos} of ${FIELD}<br>Best ${fmt(allBest.t)} (L${allBest.lap}, ${allBest.driver.name})`;
+    `${FINISHED ? "Final" : "Day 2 · Lap "+lastLap} · P${lastL.pos} of ${FIELD} · ${lastLap} laps<br>Best ${fmt(allBest.t)} (L${allBest.lap}, ${allBest.driver.name})`;
 
   // Laps 1-28 (Sarah plus the start of Thomas's stint) = day 1 length minus everything logged on day 1.
   const unloggedSecs = DAY1_SECS - S.filter(s=>s.d.day===1 && s.secs!=null).reduce((a,s)=>a+s.secs,0);
@@ -430,7 +492,7 @@ function render(){
   document.getElementById("tiles").innerHTML = D.map(x => {
     const d = x.d;
     const tag = '<span class="tags">' + [
-      live && live.driver === d.name && '<span class="pill live">In car</span>',
+      live && live.driver === d.name && (FINISHED ? '<span class="pill fast">Finished</span>' : '<span class="pill live">In car</span>'),
       d.note && `<span class="pill fast" title="${d.noteTitle||""}">${d.note}</span>`,
       x.avg!=null && x.avg===bestAvg && '<span class="pill fast">Fastest avg</span>',
       x.best!=null && x.best===allBest.t && '<span class="pill fast">Fastest lap</span>',
@@ -439,7 +501,7 @@ function render(){
     const delta = x.avg!=null && x.avg!==bestAvg ? `+${(x.avg-bestAvg).toFixed(3)}s` : (x.avg!=null ? "—" : "");
     const stintRows = x.stints.map(s => {
       const noData = !s.mine.length;
-      const range = noData ? "L1–?" : `L${s.d.from===firstLogged?"?":s.d.from}–${s.d.live?s.d.to+"+":s.d.to}`;
+      const range = noData ? "L1–?" : `L${s.d.from===firstLogged?"?":s.d.from}–${s.d.live && !FINISHED ? s.d.to+"+" : s.d.to}`;
       const time = noData ? `≈${(unloggedSecs/60).toFixed(0)} min*` : `${s.approx?"≈":""}${(s.secs/60).toFixed(0)}${s.partial?"+":""} min`;
       const a = s.avg!=null ? fmtShort(s.avg) : "—";
       return `<div class="stint"><span>Day ${s.d.day} · ${range}</span><b>${a} · ${time}</b></div>`;
@@ -465,7 +527,7 @@ function render(){
   drawChart(S, dropSlow);
   drawDist(D);
   document.getElementById("notes").innerHTML =
-    `<div>Averages leave out double-yellow laps, the red-flag lap (${laps.filter(l=>l.red).map(l=>l.lap).join(", ")}), ${blackToggle.checked ? "" : `the black-flag lap (${laps.filter(l=>l.black).map(l=>l.lap).join(", ")}), `}the overnight lap, and driver-change laps over 7:00 (${laps.filter(l=>l.pit).map(l=>l.lap).join(", ")}). Laps over 4:00 are drawn at the top of the chart${dropSlow?". Outlier laps are also dropped: anything more than 2 standard deviations slower than the mean for that stint (hollow markers). Dropped: "+laps.filter(l=>l.outlier).map(l=>l.lap).join(", "):""}.</div>
+    `<div>Averages leave out double-yellow laps, the red-flag lap (${laps.filter(l=>l.red).map(l=>l.lap).join(", ")}), ${blackToggle.checked ? "" : `the black-flag lap (${laps.filter(l=>l.black).map(l=>l.lap).join(", ")}), `}the overnight lap, and driver-change laps (${laps.filter(l=>l.pit).map(l=>l.lap).join(", ")}). Laps over 4:00 are drawn at the top of the chart${dropSlow?". Outlier laps are also dropped: anything more than 2 standard deviations slower than the mean for that stint (hollow markers). Dropped: "+laps.filter(l=>l.outlier).map(l=>l.lap).join(", "):""}.</div>
      <div>Day 1 laps 1–28 aren't available in timing, so Sarah's day 1 stint and Thomas's first laps are missing. Laps ${missingLaps.join(", ")} are missing (not listed in timing or not captured); stint times fill them with the stint median.</div>
      <div>Stint time adds up each stint's laps, starting with the driver-change lap. + means part of the stint is missing (not in timing, inside the overnight lap, or still running). ≈ means a missing lap was filled in with that stint's median lap. *Sarah's day 1 time is laps 1–28 from the 8-hour race length, and includes the start of Thomas's stint.</div>`;
 
@@ -542,7 +604,7 @@ function drawChart(S, dropSlow){
   });
   // x ticks
   const step = W<600 ? 20 : 10;
-  for (let n=step; n<x1; n+=step){
+  for (let n=step; X(n) < m.l+iw-36; n+=step){
     g += `<line x1="${X(n)}" x2="${X(n)}" y1="${pTop+pH}" y2="${pTop+pH+4}" stroke="${ink3}"/>`;
     g += `<text x="${X(n)}" y="${pTop+pH+17}" text-anchor="middle">${n}</text>`;
   }
