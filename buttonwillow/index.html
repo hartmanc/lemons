@@ -62,6 +62,11 @@ h1 .num{display:inline-block;background:var(--ink);color:var(--bg);padding:0 .22
 #chart text{font-family:"JetBrains Mono",monospace;font-size:11px;fill:var(--ink-3)}
 #chart .dlab{font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:14px;fill:var(--ink);letter-spacing:.04em;text-transform:uppercase}
 #chart .alab{font-family:"JetBrains Mono",monospace;font-size:12px;fill:var(--ink)}
+#chart .plab,#dist .rlab{font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:13px;letter-spacing:.06em;text-transform:uppercase;fill:var(--ink-2)}
+#dist svg{display:block;width:100%;height:auto}
+#dist text{font-family:"JetBrains Mono",monospace;font-size:11px;fill:var(--ink-3)}
+#dist .rlab{font-size:15px;fill:var(--ink)}
+#dist .mlab{fill:var(--ink);font-size:11px}
 #chart .ylab{fill:var(--yellow-ink);font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:12px;letter-spacing:.06em}
 .tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);font:12px/1.4 "JetBrains Mono",monospace;padding:6px 9px;white-space:nowrap;transform:translate(-50%,calc(-100% - 12px));font-variant-numeric:tabular-nums}
 .tip b{font-family:Barlow,sans-serif;font-weight:600}
@@ -90,12 +95,20 @@ tr.pit td{color:var(--ink-3)}
 
   <section class="panel">
     <div class="panel-head">
-      <h2>Lap time by lap</h2>
+      <h2>Lap time &amp; overall position by lap</h2>
       <label class="toggle"><input type="checkbox" id="slowToggle" checked> Drop outlier laps (over 2σ) from averages</label>
     </div>
     <div class="legend" id="legend"></div>
     <div id="chart"></div>
     <div class="notes" id="notes"></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2>Lap time distribution</h2>
+      <div class="legend"><span>1-second bins · curve is a normal fit (mean, σ) of the laps counted in each average</span></div>
+    </div>
+    <div id="dist"></div>
   </section>
 
   <section class="panel">
@@ -272,8 +285,9 @@ function stats(d, dropSlow){
   mine.forEach(l => { l.outlier = !l.yellow && !l.pit && l.t > cut; });
   const counted = dropSlow ? clean.filter(l => !l.outlier) : clean;
   const avg = counted.length ? counted.reduce((a,l)=>a+l.t,0)/counted.length : null;
+  const sdc = counted.length > 1 ? Math.sqrt(counted.reduce((a,l)=>a+(l.t-avg)**2,0)/(counted.length-1)) : null;
   const best = mine.length ? Math.min(...mine.map(l=>l.t)) : null;
-  return {mine, counted, avg, best, cut: clean.length > 2 ? cut : null};
+  return {mine, counted, avg, sd: sdc, best, cut: clean.length > 2 ? cut : null};
 }
 
 function render(){
@@ -304,6 +318,7 @@ function render(){
       ${avg}
       ${s.avg!=null ? `<dl>
         <dt>Best</dt><dd>${fmt(s.best)}</dd>
+        <dt>Consistency (σ)</dt><dd>${s.sd.toFixed(2)}s</dd>
         <dt>Laps counted</dt><dd>${s.counted.length} / ${s.mine.length}</dd>
         <dt>Gap to fastest</dt><dd>${delta}</dd>
       </dl>`:""}
@@ -316,6 +331,7 @@ function render(){
     `<span><i class="sw dash"></i>Stint average</span><span><i class="sw yf"></i>Yellow flag</span><span><i class="sw ol"></i>Outlier (dropped)</span>`;
 
   drawChart(S, dropSlow);
+  drawDist(S);
   document.getElementById("notes").innerHTML =
     `<div>Averages leave out yellow laps and driver-change laps (over 7:00)${dropSlow?". Outlier laps are also dropped: anything more than 2 standard deviations slower than that driver's own mean (hollow markers). Dropped: "+laps.filter(l=>l.outlier).map(l=>l.lap).join(", "):""}. Lap ${laps.filter(l=>l.pit).map(l=>l.lap).join(", ")} were driver changes and sit above the chart.</div>
      <div>Laps 1–28 aren't available in timing, so Sarah's stint and Thomas's first laps are missing. Laps 72 and 121 are not listed in timing.</div>`;
@@ -327,9 +343,13 @@ function render(){
 
 function drawChart(S, dropSlow){
   const host = document.getElementById("chart");
-  const W = Math.max(320, host.clientWidth), H = W < 600 ? 340 : 420;
+  const W = Math.max(320, host.clientWidth), ih = W < 600 ? 270 : 350;
   const m = {l:48, r:12, t:40, b:30};
-  const iw = W-m.l-m.r, ih = H-m.t-m.b;
+  const iw = W-m.l-m.r;
+  // Overall position panel sits under the lap-time panel on the same lap axis.
+  const FIELD = 105, pTop = m.t+ih+34, pH = W < 600 ? 100 : 120, H = pTop+pH+m.b;
+  const P = pos => pTop + (pos-1)/(FIELD-1)*pH;
+  const bands = [[m.t, ih], [pTop, pH]];
   const x0 = 1, x1 = Math.max(lastLap+2, 140);
   const yMin = 145, yMax = 240; // 2:25 – 4:00, anything slower is capped
   const X = n => m.l + (n-x0)/(x1-x0)*iw;
@@ -340,15 +360,16 @@ function drawChart(S, dropSlow){
   S.forEach(({d})=>{
     if (d.from==null || d.to==null) return;
     const xa = X(d.from-0.5), xb = X(d.to+0.5);
-    g += `<rect x="${xa}" y="${m.t}" width="${xb-xa}" height="${ih}" fill="${css(d.c)}" fill-opacity="${css("--band-a")}"/>`;
+    bands.forEach(([y,h])=>{ g += `<rect x="${xa}" y="${y}" width="${xb-xa}" height="${h}" fill="${css(d.c)}" fill-opacity="${css("--band-a")}"/>`; });
     g += `<line x1="${xa}" x2="${xa}" y1="${m.t-26}" y2="${m.t+ih}" stroke="${css(d.c)}" stroke-width="2"/>`;
+    g += `<line x1="${xa}" x2="${xa}" y1="${pTop}" y2="${pTop+pH}" stroke="${css(d.c)}" stroke-width="2"/>`;
   });
   // unlogged region
-  g += `<rect x="${X(0.5)}" y="${m.t}" width="${X(firstLogged-0.5)-X(0.5)}" height="${ih}" fill="url(#hatch)"/>`;
+  bands.forEach(([y,h])=>{ g += `<rect x="${X(0.5)}" y="${y}" width="${X(firstLogged-0.5)-X(0.5)}" height="${h}" fill="url(#hatch)"/>`; });
   g += `<text x="${(X(0.5)+X(firstLogged-0.5))/2}" y="${m.t+ih/2}" text-anchor="middle">${W<600?"no data":"laps 1–28 not in timing"}</text>`;
   // yellow bands
   laps.filter(l=>l.yellow).forEach(l=>{
-    g += `<rect x="${X(l.lap-0.5)}" y="${m.t}" width="${X(l.lap+0.5)-X(l.lap-0.5)}" height="${ih}" fill="url(#yhatch)"/>`;
+    bands.forEach(([y,h])=>{ g += `<rect x="${X(l.lap-0.5)}" y="${y}" width="${X(l.lap+0.5)-X(l.lap-0.5)}" height="${h}" fill="url(#yhatch)"/>`; });
   });
   const ys = laps.filter(l=>l.yellow);
   if (ys.length) g += `<text class="ylab" x="${(X(ys[0].lap-0.5)+X(ys[ys.length-1].lap+0.5))/2}" y="${m.t+ih-6}" text-anchor="middle">YELLOW</text>`;
@@ -357,13 +378,21 @@ function drawChart(S, dropSlow){
     g += `<line x1="${m.l}" x2="${m.l+iw}" y1="${Y(t)}" y2="${Y(t)}" stroke="${grid}"/>`;
     g += `<text x="${m.l-6}" y="${Y(t)+4}" text-anchor="end">${Math.floor(t/60)}:${String(t%60).padStart(2,"0")}${t===yMax?"+":""}</text>`;
   }
+  // position panel grid
+  g += `<text class="plab" x="${m.l}" y="${pTop-10}">Overall position · of ${FIELD} cars</text>`;
+  [1,25,50,75,105].forEach(p=>{
+    g += `<line x1="${m.l}" x2="${m.l+iw}" y1="${P(p)}" y2="${P(p)}" stroke="${grid}"/>`;
+    g += `<text x="${m.l-6}" y="${P(p)+4}" text-anchor="end">P${p}</text>`;
+  });
   // x ticks
   const step = W<600 ? 20 : 10;
   for (let n=step; n<x1; n+=step){
-    g += `<line x1="${X(n)}" x2="${X(n)}" y1="${m.t+ih}" y2="${m.t+ih+4}" stroke="${ink3}"/>`;
-    g += `<text x="${X(n)}" y="${m.t+ih+17}" text-anchor="middle">${n}</text>`;
+    g += `<line x1="${X(n)}" x2="${X(n)}" y1="${pTop+pH}" y2="${pTop+pH+4}" stroke="${ink3}"/>`;
+    g += `<text x="${X(n)}" y="${pTop+pH+17}" text-anchor="middle">${n}</text>`;
   }
+  g += `<text x="${m.l+iw}" y="${pTop+pH+17}" text-anchor="end">lap</text>`;
   g += `<line x1="${m.l}" x2="${m.l+iw}" y1="${m.t+ih}" y2="${m.t+ih}" stroke="${ink3}"/>`;
+  g += `<line x1="${m.l}" x2="${m.l+iw}" y1="${pTop+pH}" y2="${pTop+pH}" stroke="${ink3}"/>`;
   // lines per stint, broken at missing laps
   S.forEach(({d, mine})=>{
     let path = "", prev = null;
@@ -372,6 +401,9 @@ function drawChart(S, dropSlow){
       prev = l.lap;
     });
     if (path) g += `<path d="${path}" fill="none" stroke="${css(d.c)}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+    let pp = ""; prev = null;
+    mine.forEach(l=>{ pp += (prev!=null && l.lap===prev+1 ? "L" : "M") + X(l.lap).toFixed(1)+","+P(l.pos).toFixed(1); prev = l.lap; });
+    if (pp) g += `<path d="${pp}" fill="none" stroke="${css(d.c)}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
     mine.filter(l=>l.t>yMax).forEach(l=>{
       g += `<path d="M${X(l.lap)-5},${Y(l.t)+2}L${X(l.lap)+5},${Y(l.t)+2}L${X(l.lap)},${Y(l.t)-5}Z" fill="${css(d.c)}" stroke="${panel}" stroke-width="2"/>`;
     });
@@ -395,17 +427,23 @@ function drawChart(S, dropSlow){
     const lx = Math.max(xs+4, m.l+4);
     g += `<text class="alab" x="${lx}" y="${Y(avg)-6}" paint-order="stroke" stroke="${panel}" stroke-width="4">${W<600?fmt(avg).slice(0,6):"avg "+fmt(avg)}</text>`;
   });
+  const lastL = laps[laps.length-1];
+  g += `<circle cx="${X(lastL.lap)}" cy="${P(lastL.pos)}" r="4" fill="${css(lastL.driver.c)}" stroke="${panel}" stroke-width="2"/>`;
+  g += `<text class="alab" x="${X(lastL.lap)-8}" y="${P(lastL.pos)-8}" text-anchor="end" paint-order="stroke" stroke="${panel}" stroke-width="4">P${lastL.pos}</text>`;
+  const firstL = laps[0];
+  g += `<text class="alab" x="${X(firstL.lap)+8}" y="${P(firstL.pos)+14}" paint-order="stroke" stroke="${panel}" stroke-width="4">P${firstL.pos}</text>`;
   // hover layer
-  g += `<line id="xh" y1="${m.t}" y2="${m.t+ih}" stroke="${ink2}" stroke-width="1" visibility="hidden"/>`;
+  g += `<circle id="xp" r="4" fill="${panel}" stroke-width="2.5" visibility="hidden"/>`;
+  g += `<line id="xh" y1="${m.t}" y2="${pTop+pH}" stroke="${ink2}" stroke-width="1" visibility="hidden"/>`;
   g += `<circle id="xd" r="5" fill="${panel}" stroke-width="2.5" visibility="hidden"/>`;
-  g += `<rect id="hit" x="${m.l}" y="${m.t-30}" width="${iw}" height="${ih+30}" fill="transparent"/>`;
-  host.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Lap time by lap, colored by driver stint">
+  g += `<rect id="hit" x="${m.l}" y="${m.t-30}" width="${iw}" height="${pTop+pH-m.t+30}" fill="transparent"/>`;
+  host.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Lap time and overall position by lap, colored by driver stint">
     <defs>
       <pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="1.5" height="6" fill="${grid}"/></pattern>
       <pattern id="yhatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="2.5" height="6" fill="${yel}" fill-opacity=".45"/></pattern>
     </defs>${g}</svg><div class="tip" hidden></div>`;
   const svg = host.querySelector("svg"), tip = host.querySelector(".tip"),
-        xh = svg.getElementById("xh"), xd = svg.getElementById("xd");
+        xh = svg.getElementById("xh"), xd = svg.getElementById("xd"), xp = svg.getElementById("xp");
   const byLap = new Map(laps.map(l=>[l.lap,l]));
   const move = ev => {
     const r = svg.getBoundingClientRect(), sx = (ev.clientX - r.left) * W / r.width;
@@ -415,14 +453,63 @@ function drawChart(S, dropSlow){
     const cx = X(l.lap), cy = Y(l.t);
     xh.setAttribute("x1",cx); xh.setAttribute("x2",cx); xh.setAttribute("visibility","visible");
     xd.setAttribute("cx",cx); xd.setAttribute("cy",cy); xd.setAttribute("stroke",css(l.driver.c)); xd.setAttribute("visibility","visible");
+    xp.setAttribute("cx",cx); xp.setAttribute("cy",P(l.pos)); xp.setAttribute("stroke",css(l.driver.c)); xp.setAttribute("visibility","visible");
     tip.hidden = false;
     tip.style.left = Math.min(Math.max(cx/W*r.width, 80), r.width-80)+"px";
     tip.style.top = (cy/H*r.height)+"px";
     tip.innerHTML = `<b>Lap ${l.lap} · ${l.driver.name}</b><br>${fmt(l.t)} · P${l.pos}${l.yellow?" · yellow":""}${l.pit?" · driver change":""}`;
   };
-  const hide = () => { tip.hidden = true; xh.setAttribute("visibility","hidden"); xd.setAttribute("visibility","hidden"); };
+  const hide = () => { tip.hidden = true; xh.setAttribute("visibility","hidden"); xd.setAttribute("visibility","hidden"); xp.setAttribute("visibility","hidden"); };
   const hit = svg.getElementById("hit");
   hit.addEventListener("pointermove", move); hit.addEventListener("pointerdown", move); hit.addEventListener("pointerleave", hide);
+}
+
+function drawDist(S){
+  const host = document.getElementById("dist");
+  const rows = S.filter(s => s.counted.length > 1);
+  const W = Math.max(320, host.clientWidth), narrow = W < 600;
+  const m = {l: narrow ? 70 : 92, r:14, t:8, b:30}, rowH = narrow ? 64 : 76, gap = 10;
+  const iw = W-m.l-m.r, H = m.t + rows.length*(rowH+gap) - gap + m.b;
+  const all = rows.flatMap(s => s.counted.map(l=>l.t));
+  const BIN = 1, CAP = 185; // bins past 3:05 collapse into one overflow bin
+  const lo = Math.floor(Math.min(...all)) - 1, hi = Math.min(CAP, Math.ceil(Math.max(...all))) + 1;
+  const X = t => m.l + (Math.min(t,hi)-lo)/(hi-lo)*iw;
+  const grid = css("--grid"), ink3 = css("--ink-3"), ink2 = css("--ink-2"), panel = css("--panel");
+  const nb = Math.ceil((hi-lo)/BIN);
+  const hists = rows.map(s => { const h = new Array(nb).fill(0); s.counted.forEach(l => { h[Math.min(nb-1, Math.floor((Math.min(l.t,hi-0.001)-lo)/BIN))]++; }); return h; });
+  const maxC = Math.max(...hists.flat());
+  let g = "";
+  const tstep = narrow ? 10 : 5;
+  for (let t = Math.ceil(lo/tstep)*tstep; t <= hi; t += tstep){
+    g += `<line x1="${X(t)}" x2="${X(t)}" y1="${m.t}" y2="${H-m.b}" stroke="${grid}"/>`;
+    g += `<text x="${X(t)}" y="${H-m.b+17}" text-anchor="middle">${Math.floor(t/60)}:${String(t%60).padStart(2,"0")}${t>=hi-1?"+":""}</text>`;
+  }
+  rows.forEach((s, i) => {
+    const top = m.t + i*(rowH+gap), base = top + rowH, c = css(s.d.c);
+    const Yc = n => base - n/maxC*(rowH-14);
+    g += `<text class="rlab" x="${m.l-10}" y="${top+rowH/2}" text-anchor="end">${s.d.name}</text>`;
+    g += `<text x="${m.l-10}" y="${top+rowH/2+15}" text-anchor="end">${s.counted.length} laps</text>`;
+    hists[i].forEach((n, b) => {
+      if (!n) return;
+      const x0 = X(lo+b*BIN)+1, x1 = X(lo+(b+1)*BIN)-1, y = Yc(n);
+      const t0 = lo+b*BIN, lab = b===nb-1 && hi>=CAP ? `${fmt(t0).slice(0,4)}+` : `${fmt(t0).slice(0,4)}–${fmt(t0+BIN).slice(0,4)}`;
+      g += `<path d="M${x0},${base}V${y+2}q0,-2 2,-2H${x1-2}q2,0 2,2V${base}Z" fill="${c}" fill-opacity=".45"><title>${s.d.name}: ${n} lap${n>1?"s":""} at ${lab}</title></path>`;
+    });
+    // normal fit scaled to counts per bin
+    const n = s.counted.length, mu = s.avg, sd = Math.max(s.sd, 0.3);
+    let d = "";
+    for (let px = 0; px <= iw; px += 2){
+      const t = lo + px/iw*(hi-lo);
+      const f = n*BIN*Math.exp(-0.5*((t-mu)/sd)**2)/(sd*Math.sqrt(2*Math.PI));
+      d += (px ? "L" : "M") + (m.l+px).toFixed(1) + "," + Math.max(top, Yc(f)).toFixed(1);
+    }
+    g += `<path d="${d}" fill="none" stroke="${c}" stroke-width="2"/>`;
+    g += `<line x1="${X(mu)}" x2="${X(mu)}" y1="${top+4}" y2="${base}" stroke="${ink2}" stroke-width="1.5" stroke-dasharray="4 3"/>`;
+    const right = X(mu) > m.l + iw*0.6;
+    g += `<text class="mlab" x="${X(mu) + (right?-6:6)}" y="${top+14}" text-anchor="${right?"end":"start"}" paint-order="stroke" stroke="${panel}" stroke-width="4">${fmt(mu).slice(0,6)} · σ ${s.sd.toFixed(1)}s</text>`;
+    g += `<line x1="${m.l}" x2="${m.l+iw}" y1="${base}" y2="${base}" stroke="${ink3}"/>`;
+  });
+  host.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Lap time histograms per driver on a shared lap-time axis">${g}</svg>`;
 }
 
 slowToggle.addEventListener("change", ()=>{ try{localStorage.setItem("dropOutliers", slowToggle.checked?"1":"0");}catch(e){} render(); });
