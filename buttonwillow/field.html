@@ -75,7 +75,7 @@ th.sort{cursor:pointer} th.sort:hover{color:var(--ink)} th.sorted{color:var(--in
 </style>
 
 <body>
-<script src="nav.js"></script>
+<script src="nav.js?v=35d24123"></script>
 <div class="wrap">
   <header>
     <div>
@@ -111,7 +111,7 @@ th.sort{cursor:pointer} th.sort:hover{color:var(--ink)} th.sorted{color:var(--in
 </div>
 <div class="tip" hidden></div>
 
-<script src="data/field.js"></script>
+<script src="data/field.js?v=0590dbf3"></script>
 <script>
 const D = FIELD_DATA;
 const cars = D.cars, byNum = Object.fromEntries(cars.map(c=>[c.num,c]));
@@ -153,6 +153,7 @@ function drawWaterfall(){
     {group:"Beyond the win", label:"Our car at its best stint", desc:`${fmt1(rival.ref)} → ${fmt1(pMe)}`, d:B*(1/pMe - 1/rival.ref), pace:true},
     {label:`#${rival.num}'s car at its best stint`, desc:`${fmt1(pMe)} → ${fmt1(pThem)}`, d:B*(1/pThem - 1/pMe), car:true},
   ];
+  steps.forEach(s => { if (!s.kind) s.d = s.d || 0; });  // a cause missing from the data counts as 0
   let run = 0; steps.forEach(s => { if (s.kind) run = s.v; else { s.a = run; run += s.d; s.b = run; } });
   document.getElementById("stats").innerHTML = [
     ["--rival", target, `laps won class B (#${rival.num}); we did ${us.laps}`],
