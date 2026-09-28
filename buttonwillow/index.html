@@ -95,7 +95,7 @@ tr.pit td{color:var(--ink-3)}
   <header>
     <div>
       <h1><span class="num">#619</span>Buttonwillow stints</h1>
-      <div class="sub">Lap times by driver · 27–28 Sep 2026 · Buttonwillow Raceway</div>
+      <div class="sub">Lap times by driver · 26–27 Sep 2026 · Buttonwillow Raceway · <a href="field.html" style="color:inherit">Top 20 &amp; class B gap</a></div>
     </div>
     <div class="meta" id="meta"></div>
   </header>
@@ -132,19 +132,48 @@ tr.pit td{color:var(--ink-3)}
 </div>
 
 <script>
-// Lap data transcribed from Race Monitor screenshots.
-// flag: "Y" = yellow lap, "C" = checkered-flag lap (day 1 ended under yellow),
+// Lap data from the official MYLAPS Speedhive results (data/laps.csv, session 12906863);
+// positions are the official field positions.
+// flag: "S" = standing-traffic start lap, "Y" = yellow lap, "C" = checkered-flag lap (day 1 ended under yellow),
 // "B" = black flag (laps 225, 237), "D" = driver change shorter than 7:00 (238, 263),
 // "R" = red flag (lap 185: a Ford Pinto rolled over at Star Mazda just after Thomas went out),
 // "O" = overnight lap from the day 1 flag to the first crossing on day 2 (14:55:46). Pit laps (driver changes) are detected as > 7:00.
 const RAW = `
-29 3:47.425 64
-30 3:11.373 62
-31 3:03.207 62
-32 2:41.593 60
-33 2:40.161 57
-34 2:44.230 54
-35 2:42.970 54
+1 3:38.203 82 S
+2 3:30.450 82
+3 3:18.670 80
+4 3:44.681 80
+5 3:30.622 82
+6 3:08.073 82
+7 3:02.353 83
+8 3:04.935 81
+9 3:06.701 79
+10 3:08.820 76
+11 3:05.169 70
+12 3:07.447 69
+13 3:14.106 68
+14 3:07.642 65
+15 3:10.391 62
+16 3:09.589 61
+17 3:36.370 62
+18 3:12.840 61
+19 3:10.080 61
+20 3:10.759 63
+21 3:16.241 63
+22 3:09.795 63
+23 3:15.801 61
+24 3:22.439 58
+25 3:12.999 59
+26 3:07.659 61
+27 3:19.699 61
+28 7:37.666 65
+29 3:47.425 66
+30 3:11.373 64
+31 3:03.207 64
+32 2:41.593 62
+33 2:40.161 58
+34 2:44.230 55
+35 2:42.970 55
 36 2:41.984 54
 37 2:54.676 53
 38 2:45.139 51
@@ -181,27 +210,28 @@ const RAW = `
 69 2:32.099 40
 70 2:33.865 37
 71 2:44.472 34
-73 2:38.964 33
-74 2:32.684 30
-75 2:33.364 29
-76 2:33.158 29
-77 2:31.866 29
-78 2:33.635 28
-79 2:34.556 28
-80 2:39.439 28
-81 2:39.202 28
-82 2:36.559 27
-83 2:31.301 27
-84 2:40.033 27
-85 2:33.623 27
-86 2:34.458 27
-87 2:39.945 26
-88 2:35.279 26
-89 2:30.744 26
-90 2:34.315 26
-91 2:34.587 26
-92 2:34.575 26
-93 2:36.423 26
+72 2:46.143 34
+73 2:38.964 34
+74 2:32.684 31
+75 2:33.364 30
+76 2:33.158 30
+77 2:31.866 30
+78 2:33.635 29
+79 2:34.556 29
+80 2:39.439 29
+81 2:39.202 29
+82 2:36.559 28
+83 2:31.301 28
+84 2:40.033 28
+85 2:33.623 28
+86 2:34.458 28
+87 2:39.945 27
+88 2:35.279 27
+89 2:30.744 27
+90 2:34.315 27
+91 2:34.587 27
+92 2:34.575 27
+93 2:36.423 27
 94 7:56.680 29
 95 3:41.046 29
 96 2:53.734 29
@@ -216,60 +246,61 @@ const RAW = `
 105 2:41.774 27
 106 2:50.611 27
 107 2:38.695 27
-108 2:48.120 26
-109 3:35.883 26
-110 2:36.204 26
-111 2:37.881 25
-112 2:30.810 24
-113 2:35.062 22
-114 2:46.606 22
-115 2:40.414 20
-116 2:47.450 20
-117 3:03.736 20 Y
-118 4:36.807 20 Y
-119 3:35.828 19 Y
-120 4:08.625 19 Y
-122 4:16.142 19
-123 2:48.531 19
-124 2:30.703 19
-125 2:30.920 19
-126 2:34.234 19
-127 7:51.693 21
-128 3:10.622 21
-129 2:40.552 21
-130 2:43.247 21
-131 2:38.313 21
-132 2:35.878 21
-133 2:32.035 21
-134 2:31.792 21
-135 2:39.317 21
-136 2:33.771 21
-137 2:36.973 21
-138 2:36.882 21
-139 2:34.462 21
-140 2:42.674 21
-141 2:44.560 21
-142 2:38.707 21
-143 2:35.917 21
-144 2:48.063 21
-145 2:42.542 21
-146 2:35.362 21
-147 2:40.278 21
-148 2:35.134 21
-149 2:34.387 21
-150 2:34.457 21
-151 2:41.747 21
-152 2:43.828 21
-153 2:43.848 21
-154 2:39.779 21
-155 2:41.583 21 Y
-156 3:06.613 21 Y
-157 3:52.503 21 Y
-158 5:02.416 21 C
-159 895:46.082 21 O
-160 3:47.232 20
-161 3:26.249 21
-162 3:24.426 21
+108 2:48.120 27
+109 3:35.883 27
+110 2:36.204 27
+111 2:37.881 26
+112 2:30.810 25
+113 2:35.062 23
+114 2:46.606 23
+115 2:40.414 21
+116 2:47.450 21
+117 3:03.736 21 Y
+118 4:36.807 21 Y
+119 3:35.828 20 Y
+120 4:08.625 20 Y
+121 3:48.733 20 Y
+122 4:16.142 20
+123 2:48.531 20
+124 2:30.703 20
+125 2:30.920 20
+126 2:34.234 20
+127 7:51.661 22
+128 3:10.622 22
+129 2:40.552 22
+130 2:43.247 22
+131 2:38.313 22
+132 2:35.878 22
+133 2:32.035 22
+134 2:31.792 22
+135 2:39.317 22
+136 2:33.771 22
+137 2:36.973 22
+138 2:36.882 22
+139 2:34.462 22
+140 2:42.674 22
+141 2:44.560 22
+142 2:38.707 22
+143 2:35.917 22
+144 2:48.063 22
+145 2:42.542 22
+146 2:35.362 22
+147 2:40.278 22
+148 2:35.134 22
+149 2:34.387 22
+150 2:34.457 22
+151 2:41.747 22
+152 2:43.828 22
+153 2:43.848 22
+154 2:39.779 22
+155 2:41.583 22 Y
+156 3:06.613 22 Y
+157 3:52.503 22 Y
+158 5:02.416 22 C
+159 895:46.082 22 O
+160 3:47.232 21
+161 3:26.249 22
+162 3:24.426 22
 163 3:21.764 22
 164 3:17.984 22
 165 3:17.527 21
@@ -299,6 +330,7 @@ const RAW = `
 189 2:44.196 19
 190 2:41.349 19
 191 2:39.218 19
+192 2:37.132 19
 193 2:40.575 19
 194 3:05.923 19
 195 2:37.825 19
@@ -308,11 +340,14 @@ const RAW = `
 199 2:36.144 19
 200 2:47.694 19
 201 2:41.944 19
+202 2:38.942 19
+203 2:39.919 19
+204 2:41.804 19
 205 2:38.219 19
 206 2:40.468 19
 207 2:37.555 19
 208 2:41.668 19
-209 7:08.797 19
+209 7:08.766 19
 210 3:06.583 19
 211 2:48.988 19
 212 2:33.491 18
@@ -341,7 +376,7 @@ const RAW = `
 235 2:34.445 16
 236 2:54.991 16
 237 5:23.589 16 B
-238 6:54.649 17 D
+238 6:54.611 17 D
 239 3:11.736 17
 240 2:34.883 16
 241 2:33.524 16
@@ -370,9 +405,11 @@ const RAW = `
 264 3:08.795 15
 265 2:42.019 15
 266 2:34.431 15
+267 2:31.017 15
 268 2:31.875 15
 269 2:37.180 15
 270 2:33.185 15
+271 2:30.883 15
 272 2:34.056 15
 273 2:34.127 15
 274 2:37.602 15
@@ -390,8 +427,6 @@ const RAW = `
 286 2:31.576 15
 287 2:34.197 15
 `;
-// Driver order on day 1 is assumed to match the roster order. The first change
-// happened somewhere in laps 1-28, which aren't in timing.
 const DRIVERS = {
   Sarah:  {name:"Sarah",  c:"--s1", note:"Rookie", noteTitle:"Sarah's 3rd race"},
   Thomas: {name:"Thomas", c:"--s2"},
@@ -401,8 +436,8 @@ const DRIVERS = {
 };
 // One entry per stint. Each driver-change lap (over 7:00) starts the next stint.
 const STINTS = [
-  {driver:"Sarah",  day:1, from:1,    to:null},
-  {driver:"Thomas", day:1, from:null, to:59},
+  {driver:"Sarah",  day:1, from:1,    to:27},
+  {driver:"Thomas", day:1, from:28,   to:59},
   {driver:"Coby",   day:1, from:60,   to:93},
   {driver:"Pablo",  day:1, from:94,   to:126},
   {driver:"Elias",  day:1, from:127,  to:158},
@@ -417,23 +452,17 @@ const PIT = 420, SIGMAS = 2, FIELD = 105, FINISHED = true;
 const parseT = s => { const [m,r] = s.split(":"); return +m*60 + +r; };
 const fmt = t => { const m = Math.floor(t/60), s = t - m*60; return m + ":" + s.toFixed(3).padStart(6,"0"); };
 const fmtShort = t => fmt(t).slice(0, fmt(t).length-2);
-const laps = RAW.trim().split("\n").map(l => { const [n,t,p,f] = l.trim().split(/\s+/); return {lap:+n, t:parseT(t), pos:+p, yellow:f==="Y", check:f==="C", overnight:f==="O", red:f==="R", black:f==="B", change:f==="D"}; });
+const laps = RAW.trim().split("\n").map(l => { const [n,t,p,f] = l.trim().split(/\s+/); return {lap:+n, t:parseT(t), pos:+p, yellow:f==="Y", check:f==="C", overnight:f==="O", red:f==="R", black:f==="B", change:f==="D", start:f==="S"}; });
 laps.forEach(l => { l.pit = l.change || (!l.overnight && !l.red && !l.black && l.t > PIT); });
 
-const firstLogged = laps[0].lap;
 const lastLap = laps[laps.length-1].lap;
-// Day 1 was an 8-hour race: the timing clock read 8:00:44 just after the flag.
-const DAY1_SECS = 8*3600;
-const lapByNum = new Map(laps.map(l=>[l.lap,l]));
-const missingLaps = []; for (let n=firstLogged; n<=lastLap; n++) if (!lapByNum.has(n)) missingLaps.push(n);
 STINTS.forEach(s => {
   Object.assign(s, DRIVERS[s.driver]);
-  if (s.from == null) s.from = firstLogged;
   if (s.to == null && s.live) s.to = lastLap;
 });
 const stintOf = lap => STINTS.find(s => s.to != null && lap >= s.from && lap <= s.to);
 laps.forEach(l => { l.driver = stintOf(l.lap); });
-const excluded = l => l.yellow || l.pit || l.check || l.overnight || l.red || l.black;
+const excluded = l => l.yellow || l.pit || l.check || l.overnight || l.red || l.black || l.start;
 
 const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 const slowToggle = document.getElementById("slowToggle");
@@ -454,18 +483,11 @@ function stats(st, dropSlow){
   // average. They never set the outlier cut and are never dropped as outliers.
   const black = blackToggle.checked ? mine.filter(l => l.black) : [];
   const counted = (dropSlow ? clean.filter(l => !l.outlier) : clean).concat(black);
-  // Stint time: every lap in the stint, driver-change lap included. Laps missing
-  // from timing (e.g. 72, 121) are filled with the stint's median lap.
-  let secs = null, approx = false;
-  const timed = mine.filter(l => !l.overnight);
-  if (timed.length){
-    const ts = timed.map(l=>l.t).sort((a,b)=>a-b), med = ts[Math.floor(ts.length/2)];
-    let missing = 0; for (let n=st.from; n<=st.to; n++) if (!lapByNum.has(n)) missing++;
-    secs = ts.reduce((a,t)=>a+t,0) + missing*med; approx = missing > 0;
-  }
+  // Stint time: every lap in the stint, driver-change lap included.
+  const secs = mine.filter(l => !l.overnight).reduce((a,l)=>a+l.t,0);
   const best = mine.length ? Math.min(...mine.map(l=>l.t)) : null;
-  return {d: st, mine, counted, avg: meanOf(counted), sd: sdOf(counted), best, secs, approx,
-          partial: st.from === firstLogged || mine.some(l=>l.overnight) || (st.live && !FINISHED)};
+  return {d: st, mine, counted, avg: meanOf(counted), sd: sdOf(counted), best, secs,
+          partial: mine.some(l=>l.overnight) || (st.live && !FINISHED)};
 }
 
 function render(){
@@ -486,9 +508,6 @@ function render(){
   document.getElementById("meta").innerHTML =
     `${FINISHED ? "Final" : "Day 2 · Lap "+lastLap} · P${lastL.pos} of ${FIELD}${FINISHED ? " · P7 in class B" : ""} · ${lastLap} laps<br>Best ${fmt(allBest.t)} (L${allBest.lap}, ${allBest.driver.name})`;
 
-  // Laps 1-28 (Sarah plus the start of Thomas's stint) = day 1 length minus everything logged on day 1.
-  const unloggedSecs = DAY1_SECS - S.filter(s=>s.d.day===1 && s.secs!=null).reduce((a,s)=>a+s.secs,0);
-
   document.getElementById("tiles").innerHTML = D.map(x => {
     const d = x.d;
     const tag = '<span class="tags">' + [
@@ -500,9 +519,8 @@ function render(){
     const avg = x.avg!=null ? `<div class="avg">${fmt(x.avg)}</div>` : `<div class="avg none">No laps logged</div>`;
     const delta = x.avg!=null && x.avg!==bestAvg ? `+${(x.avg-bestAvg).toFixed(3)}s` : (x.avg!=null ? "—" : "");
     const stintRows = x.stints.map(s => {
-      const noData = !s.mine.length;
-      const range = noData ? "L1–?" : `L${s.d.from===firstLogged?"?":s.d.from}–${s.d.live && !FINISHED ? s.d.to+"+" : s.d.to}`;
-      const time = noData ? `≈${(unloggedSecs/60).toFixed(0)} min*` : `${s.approx?"≈":""}${(s.secs/60).toFixed(0)}${s.partial?"+":""} min`;
+      const range = `L${s.d.from}–${s.d.live && !FINISHED ? s.d.to+"+" : s.d.to}`;
+      const time = `${(s.secs/60).toFixed(0)}${s.partial?"+":""} min`;
       const a = s.avg!=null ? fmtShort(s.avg) : "—";
       return `<div class="stint"><span>Day ${s.d.day} · ${range}</span><b>${a} · ${time}</b></div>`;
     }).join("");
@@ -527,13 +545,12 @@ function render(){
   drawChart(S, dropSlow);
   drawDist(D);
   document.getElementById("notes").innerHTML =
-    `<div>Averages leave out double-yellow laps, the red-flag lap (${laps.filter(l=>l.red).map(l=>l.lap).join(", ")}), ${blackToggle.checked ? "" : `the black-flag laps (${laps.filter(l=>l.black).map(l=>l.lap).join(", ")}), `}the overnight lap, and driver-change laps (${laps.filter(l=>l.pit).map(l=>l.lap).join(", ")}). Laps over 4:00 are drawn at the top of the chart${dropSlow?". Outlier laps are also dropped: anything more than 2 standard deviations slower than the mean for that stint (hollow markers). Dropped: "+laps.filter(l=>l.outlier).map(l=>l.lap).join(", "):""}.</div>
-     <div>Day 1 laps 1–28 aren't available in timing, so Sarah's day 1 stint and Thomas's first laps are missing. Laps ${missingLaps.join(", ")} are missing (not listed in timing or not captured); stint times fill them with the stint median.</div>
-     <div>Stint time adds up each stint's laps, starting with the driver-change lap. + means part of the stint is missing (not in timing, inside the overnight lap, or still running). ≈ means a missing lap was filled in with that stint's median lap. *Sarah's day 1 time is laps 1–28 from the 8-hour race length, and includes the start of Thomas's stint.</div>`;
+    `<div>Averages leave out the start lap, double-yellow laps, the red-flag lap (${laps.filter(l=>l.red).map(l=>l.lap).join(", ")}), ${blackToggle.checked ? "" : `the black-flag laps (${laps.filter(l=>l.black).map(l=>l.lap).join(", ")}), `}the overnight lap, and driver-change laps (${laps.filter(l=>l.pit).map(l=>l.lap).join(", ")}). Laps over 4:00 are drawn at the top of the chart${dropSlow?". Outlier laps are also dropped: anything more than 2 standard deviations slower than the mean for that stint (hollow markers). Dropped: "+laps.filter(l=>l.outlier).map(l=>l.lap).join(", "):""}.</div>
+     <div>Lap times and positions are the official MYLAPS results. Stint time adds up each stint's laps, starting with the driver-change lap. + means part of the stint is inside the overnight lap${FINISHED ? "" : " or still running"}.</div>`;
 
   // Table
   document.getElementById("tbl").innerHTML = `<thead><tr><th>Lap</th><th>Pos</th><th>Driver</th><th>Time</th><th>Note</th></tr></thead><tbody>` +
-    laps.slice().reverse().map(l=>`<tr class="${l.yellow?"yel":""} ${l.pit||l.overnight?"pit":""} ${l.red?"red":""} ${l.black?"pit":""}"><td>${l.lap}</td><td>${l.pos}</td><td>${l.driver.name}</td><td>${fmt(l.t)}</td><td>${l.overnight?"Overnight":l.red?"Red flag (Pinto rollover, Star Mazda)":l.black?"Black flag":l.pit?"Driver change":l.check?"Checkered (under double yellow)":l.yellow?"Double yellow":l.outlier?"Outlier (>2σ)":l.t===allBest.t?"Best":""}</td></tr>`).join("") + `</tbody>`;
+    laps.slice().reverse().map(l=>`<tr class="${l.yellow?"yel":""} ${l.pit||l.overnight?"pit":""} ${l.red?"red":""} ${l.black?"pit":""}"><td>${l.lap}</td><td>${l.pos}</td><td>${l.driver.name}</td><td>${fmt(l.t)}</td><td>${l.overnight?"Overnight":l.red?"Red flag (Pinto rollover, Star Mazda)":l.black?"Black flag":l.pit?"Driver change":l.check?"Checkered (under double yellow)":l.start?"Start":l.yellow?"Double yellow":l.outlier?"Outlier (>2σ)":l.t===allBest.t?"Best":""}</td></tr>`).join("") + `</tbody>`;
 }
 
 function drawChart(S, dropSlow){
@@ -564,9 +581,6 @@ function drawChart(S, dropSlow){
     const st = STINTS.find(s => s.day === day && s.to != null);
     if (st) g += `<text class="plab" x="${X(day===1 ? 0.5 : st.from-0.5)+(day===1?0:6)}" y="${m.t-36}">Day ${day}</text>`;
   });
-  // unlogged region
-  bands.forEach(([y,h])=>{ g += `<rect x="${X(0.5)}" y="${y}" width="${X(firstLogged-0.5)-X(0.5)}" height="${h}" fill="url(#hatch)"/>`; });
-  g += `<text x="${(X(0.5)+X(firstLogged-0.5))/2}" y="${m.t+ih/2}" text-anchor="middle">${W<600?"no data":"laps 1–28 not in timing"}</text>`;
   // yellow bands
   laps.filter(l=>l.yellow).forEach(l=>{
     bands.forEach(([y,h])=>{ g += `<rect x="${X(l.lap-0.5)}" y="${y}" width="${X(l.lap+0.5)-X(l.lap-0.5)}" height="${h}" fill="url(#yhatch)"/>`; });
@@ -646,7 +660,7 @@ function drawChart(S, dropSlow){
     const xa = X(d.from-0.5)+6;
     g += `<text class="dlab" x="${xa}" y="${m.t-12}">${d.name}</text>`;
     if (avg==null) return;
-    const xs = X(Math.max(d.from, firstLogged)-0.5), xe = X(d.to+0.5);
+    const xs = X(d.from-0.5), xe = X(d.to+0.5);
     g += `<line x1="${xs}" x2="${xe}" y1="${Y(avg)}" y2="${Y(avg)}" stroke="${ink2}" stroke-width="1.5" stroke-dasharray="5 4"/>`;
     const lx = Math.max(xs+4, m.l+4);
     g += `<text class="alab" x="${lx}" y="${Y(avg)-6}" paint-order="stroke" stroke="${panel}" stroke-width="4">${W<600?fmt(avg).slice(0,6):"avg "+fmt(avg)}</text>`;

@@ -1,0 +1,303 @@
+<title>Buttonwillow Top 20</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#f3f4f6; --panel:#ffffff; --ink:#12151a; --ink-2:#4a505a; --ink-3:#7c828c;
+  --rule:#dfe2e7; --grid:#e8eaee;
+  --a:#7c828c; --b:#2a78d6; --c:#1baf7a; --us:#eb6834; --rival:#4a3aa7;
+  --pos:#d03b3b; --neg:#1a9e55; --yellow:#f2c200;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0f1114; --panel:#171a1f; --ink:#f2f3f5; --ink-2:#b4b9c2; --ink-3:#7f8590;
+    --rule:#2a2e35; --grid:#23272d;
+    --a:#7f8590; --b:#3987e5; --c:#199e70; --us:#d95926; --rival:#9085e9;
+    --pos:#e05555; --neg:#3cc27a; --yellow:#e0b400;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0f1114; --panel:#171a1f; --ink:#f2f3f5; --ink-2:#b4b9c2; --ink-3:#7f8590;
+  --rule:#2a2e35; --grid:#23272d;
+  --a:#7f8590; --b:#3987e5; --c:#199e70; --us:#d95926; --rival:#9085e9;
+  --pos:#e05555; --neg:#3cc27a; --yellow:#e0b400;
+}
+body{background:var(--bg);color:var(--ink);font:15px/1.45 Barlow,system-ui,sans-serif;margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:20px 48px;display:grid;gap:18px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:8px 24px;border-bottom:2px solid var(--ink);padding-bottom:10px}
+h1{font:700 clamp(28px,5vw,44px)/1 "Barlow Condensed",sans-serif;letter-spacing:.01em;margin:0;text-transform:uppercase;text-wrap:balance}
+h1 .num{display:inline-block;background:var(--ink);color:var(--bg);padding:0 .22em;margin-right:.2em}
+.sub{color:var(--ink-2);font-size:14px}
+.sub a{color:inherit}
+.meta{font:500 13px "JetBrains Mono",monospace;color:var(--ink-2);text-align:right;font-variant-numeric:tabular-nums}
+.panel{background:var(--panel);border:1px solid var(--rule);padding:14px}
+.panel-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px 16px;margin-bottom:8px}
+.panel-head h2{margin:0;font:700 20px "Barlow Condensed",sans-serif;text-transform:uppercase;letter-spacing:.03em}
+.lede{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:18px}
+@media (max-width:820px){.lede{grid-template-columns:minmax(0,1fr)}}
+.big{font:700 clamp(56px,9vw,96px)/.9 "Barlow Condensed",sans-serif}
+.big small{font-size:.35em;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);margin-left:.2em}
+.lede p{margin:.6em 0 0;color:var(--ink-2)}
+.lede p b{color:var(--ink)}
+.label{font:600 12px "Barlow Condensed",sans-serif;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+select{font:inherit;font-size:14px;background:var(--panel);color:var(--ink);border:1px solid var(--rule);padding:4px 8px;max-width:100%}
+.bars{display:grid;grid-template-columns:minmax(120px,210px) minmax(0,1fr) 64px;gap:6px 10px;align-items:center;font-size:14px}
+.bars .k{color:var(--ink-2)}
+.bars .k b{color:var(--ink);font-weight:600;display:block;line-height:1.2}
+.bars .track{position:relative;height:22px}
+.bars .zero{position:absolute;top:-3px;bottom:-3px;width:1px;background:var(--ink-3)}
+.bars .bar{position:absolute;top:3px;height:16px;border-radius:2px}
+.bars .v{font:500 13px "JetBrains Mono",monospace;text-align:right;font-variant-numeric:tabular-nums}
+.bars .total{border-top:1px solid var(--rule);padding-top:6px}
+.notes{font-size:13px;color:var(--ink-2);display:grid;gap:6px;margin-top:10px}
+.notes p{margin:0}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font:13px "JetBrains Mono",monospace;font-variant-numeric:tabular-nums}
+th,td{padding:5px 8px;border-bottom:1px solid var(--rule);text-align:right;white-space:nowrap}
+th{font:600 12px "Barlow Condensed",sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);vertical-align:bottom}
+td.l,th.l{text-align:left}
+td.team{font-family:Barlow,sans-serif;font-size:14px;white-space:normal;min-width:150px}
+td.team small{display:block;color:var(--ink-3);font-size:12px}
+tr.us td{background:color-mix(in srgb,var(--us) 12%,transparent)}
+tr.rival td{background:color-mix(in srgb,var(--rival) 12%,transparent)}
+.cls{display:inline-block;min-width:1.6em;text-align:center;font:700 12px "Barlow Condensed",sans-serif;color:#fff;border-radius:3px;padding:1px 4px}
+.good{color:var(--neg)} .bad{color:var(--pos)}
+th.sort{cursor:pointer} th.sort:hover{color:var(--ink)} th.sorted{color:var(--ink)}
+#gantt svg{display:block;width:100%;height:auto}
+#gantt text{font-family:"JetBrains Mono",monospace;font-size:11px;fill:var(--ink-3)}
+#gantt .rl{font-family:Barlow,sans-serif;font-size:12px;fill:var(--ink-2)}
+#gantt .rl.hi{fill:var(--ink);font-weight:600}
+#gantt .pl{font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:13px;letter-spacing:.06em;fill:var(--ink-2)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:14px;height:10px;border-radius:2px;background:var(--c)}
+.tip{position:fixed;pointer-events:none;background:var(--ink);color:var(--bg);font:12px/1.4 "JetBrains Mono",monospace;padding:6px 9px;white-space:nowrap;z-index:5;font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid var(--b);outline-offset:2px}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1><span class="num">Top 20</span>Buttonwillow</h1>
+      <div class="sub">Button Turrible 2026 · 26–27 Sep · official <a href="https://speedhive.mylaps.com/sessions/12906863">MYLAPS results</a> · <a href="index.html">#619 driver stints</a></div>
+    </div>
+    <div class="meta" id="meta"></div>
+  </header>
+
+  <section class="panel lede">
+    <div>
+      <div class="label">Gap to the class B win</div>
+      <div class="big" id="gapBig"></div>
+      <div id="gapText"></div>
+    </div>
+    <div>
+      <div class="panel-head">
+        <h2>Where the laps went</h2>
+        <label class="label">Compare with <select id="vs"></select></label>
+      </div>
+      <div class="bars" id="bars"></div>
+      <div class="notes" id="barNotes"></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2>Our stints vs the class B winner, same time on track</h2>
+    </div>
+    <div class="tbl"><table id="stintTbl"></table></div>
+    <div class="notes"><p>Each row compares the same stretch of the race, so track conditions, yellows and traffic are shared. "Our green avg" counts every green lap in the stint, off-pace laps included (driver changes, yellows, the red flag and the start lap aren't counted). The other columns use clean laps only. Time vs winner is our green laps minus the same number of laps at their clean pace. The total is roughly the pace and off-pace parts of the breakdown above, measured a different way.</p></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2>Stints and stops, top 20</h2>
+      <div class="legend" id="gLegend"></div>
+    </div>
+    <div id="gantt"></div>
+    <div class="notes"><p>Each bar is a run between pit stops, and each gap is a stop. The timing only shows when a car was in the pit lane, not who was driving, so a stop could be a driver change, fuel, a black flag or a repair. Our two known black flags are drawn as ticks, not gaps. Hover a bar for details.</p></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2>Top 20: pace, stops and stints</h2>
+    </div>
+    <div class="tbl"><table id="tbl"></table></div>
+    <div class="notes">
+      <p><b>Clean avg</b>: mean of green laps that aren't in or out of the pits, the start lap, the first lap of day 2, or more than 25% over the car's median. <b>Top 10%</b>: mean of the car's fastest tenth of clean laps, which shows how fast the car can go. <b>Stop cost</b>: in-lap plus out-lap minus two clean laps, which is the time a stop really costs. Drive-throughs (under 45 s) aren't counted as stops. <b>Grid</b>: how long after the green (the leader's first crossing) this car first crossed the line, which is time driven but not counted as a lap.</p>
+      <p><b>Laps</b> are laps driven; <b>pen</b> is laps taken off in the official results (penalty laps).</p>
+    </div>
+  </section>
+</div>
+<div class="tip" hidden></div>
+
+<script src="data/field.js"></script>
+<script>
+const D = FIELD_DATA;
+const cars = D.cars, byNum = Object.fromEntries(cars.map(c=>[c.num,c]));
+const us = byNum[D.us], rival = byNum[D.rival];
+const fmt = t => { const m = Math.floor(t/60), s = t - m*60; return m + ":" + s.toFixed(3).padStart(6,"0"); };
+const fmt1 = t => fmt(t).slice(0,-2);
+const mins = s => (s/60).toFixed(1);
+const clsVar = c => ({A:"--a",B:"--b",C:"--c"})[c] || "--a";
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const esc = s => String(s).replace(/[&<>"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[ch]);
+const name = c => `#${c.num} ${esc(c.team)}`;
+const realStops = c => c.stops.filter(s=>!s.drive);
+const tip = document.querySelector(".tip");
+const showTip = (ev, html) => { tip.hidden = false; tip.innerHTML = html;
+  const w = tip.offsetWidth; tip.style.left = Math.min(ev.clientX+12, innerWidth-w-8)+"px"; tip.style.top = (ev.clientY+14)+"px"; };
+
+document.getElementById("meta").innerHTML =
+  `#${us.num} · P${us.pos} of 105 · P${us.class_pos} in class B · ${us.laps} laps<br>Class B winner #${rival.num} · P${rival.pos} · ${rival.laps} laps`;
+
+// ---- gap breakdown
+const PARTS = [
+  ["pace",   "Green-flag pace",   "Clean lap average over the whole race"],
+  ["slow",   "Off-pace laps",     "Green laps over 25% slower than the car's median"],
+  ["black",  "Our black flags",   "Laps 224–225 and 236–237"],
+  [["stop","yellow"], "Pit stops & yellows", "Stop time, net of stops made under yellow"],
+  ["grid",   "Spot at the green", "Uncounted partial lap before first crossing"],
+  [["timing","red"], "Line-crossing timing", "Red flag, day 2 restart order, checkered"],
+  ["start",  "First laps",        "Lap 1 and the first lap of day 2"],
+];
+const vsSel = document.getElementById("vs");
+vsSel.innerHTML = cars.filter(c=>c!==us).map(c=>`<option value="${c.num}"${c===rival?" selected":""}>P${c.pos} ${name(c)} (${c.class})</option>`).join("");
+function drawBars(){
+  const o = byNum[vsSel.value], g = o.gap_to_us;
+  const vals = PARTS.map(([k,label,desc])=>({label,desc,v:[].concat(k).reduce((a,x)=>a+(g[x]||0),0)}));
+  const lo = Math.min(0, ...vals.map(x=>x.v)), hi = Math.max(0, ...vals.map(x=>x.v));
+  const X = v => (v-lo)/(hi-lo)*100;
+  const total = vals.reduce((a,x)=>a+x.v,0);
+  document.getElementById("bars").innerHTML = vals.map(x=>`
+    <div class="k"><b>${x.label}</b>${x.desc}</div>
+    <div class="track"><i class="zero" style="left:${X(0)}%"></i>
+      <i class="bar" style="left:${X(Math.min(0,x.v))}%;width:${Math.abs(X(x.v)-X(0))}%;background:var(${x.v>=0?"--pos":"--neg"})"></i></div>
+    <div class="v ${x.v>=0?"bad":"good"}">${x.v>=0?"+":""}${x.v.toFixed(1)}</div>`).join("") +
+    `<div class="k total"><b>Total</b>laps driven, #${o.num} minus #${us.num}</div><div class="total"></div><div class="v total">${total>=0?"+":""}${total.toFixed(1)}</div>`;
+  document.getElementById("barNotes").innerHTML = `<p>Laps #${o.num} gained on us (red) or lost to us (green) from each cause. The parts add up to the real difference in laps driven (${o.laps} vs ${us.laps}${o.penalty?`; #${o.num} then lost ${o.penalty} penalty laps`:""}). Pace is compared over the time we spent racing. Each kind of lost time is turned into laps at #${o.num}'s pace.</p>
+    <p>Everyone gets the same yellows and red flag, so those aren't rows of their own. What can differ is when a car pits: a stop during a yellow costs less, because the field is slow too. That's why yellows sit with pit stops. The red flag, the day 2 restart and the checkered flag only matter for where a car was when they happened, so they're grouped as line-crossing timing.</p>`;
+}
+vsSel.addEventListener("change", drawBars);
+
+(function lede(){
+  const g = rival.gap_to_us, gap = rival.laps - us.laps;
+  const sarah = D.our_stints.filter(s=>s.driver==="Sarah").reduce((a,s)=>a+s.lost_s,0);
+  const rest = D.our_stints.filter(s=>s.driver!=="Sarah").reduce((a,s)=>a+s.lost_s,0);
+  const nonBlackStops = us.excess.stop, rivalStops = rival.excess.stop;
+  document.getElementById("gapBig").innerHTML = `${gap}<small>laps</small>`;
+  document.getElementById("gapText").innerHTML = `
+    <p>#${rival.num} ${esc(rival.team)} won class B with <b>${rival.laps}</b> laps to our <b>${us.laps}</b>. That's about <b>${Math.round(gap*us.ref/60)} minutes</b> of racing at our pace.</p>
+    <p><b>Pace was most of it (${g.pace.toFixed(1)} laps).</b> Their clean average was ${fmt1(rival.ref)} to our ${fmt1(us.ref)}. Stint by stint, Sarah's two stints were ${Math.round(sarah/60)} min behind their pace at the same time of day. The other eight stints together were ${Math.abs(Math.round(rest/60))} min ${rest>0?"behind":"ahead"}. Coby, Pablo and Elias were faster than their drivers on both days.</p>
+    <p><b>Our pit work matched theirs.</b> Our 8 driver changes cost ${mins(nonBlackStops)} min to their ${mins(rivalStops)} min for 7 stops. One of their stops fell during Saturday's yellow, and with that counted they came out about ${(g.stop+g.yellow).toFixed(1)} lap ahead on stops. We never pitted under a yellow; 13 of the top 20 did at least once. The two black flags cost another ${mins(us.excess.black)} min (${g.black.toFixed(1)} laps).</p>
+    <p><b>Where we were at the green cost ${g.grid.toFixed(1)} laps.</b> There's no set grid, and a car's laps only start counting at its first crossing after the green. Everything before that is an uncounted partial lap. The leader crossed right at the green. We crossed ${Math.round(us.grid_delay)} s later, ${Math.round(us.grid_delay-rival.grid_delay)} s after #${rival.num}, so we drove most of a lap that didn't count.</p>`;
+})();
+
+// ---- our stints vs rival
+(function stintTable(){
+  const rows = D.our_stints;
+  document.getElementById("stintTbl").innerHTML = `<thead><tr><th class="l">Driver</th><th class="l">When</th><th>Laps</th><th>Our green avg</th><th>Our clean avg</th><th>#${rival.num} clean avg</th><th>Class B top-10 median</th><th>Time vs #${rival.num}</th><th>≈ Laps</th></tr></thead><tbody>` +
+    rows.map(s=>`<tr><td class="l team">${s.driver}</td><td class="l">${s.at}</td><td>${s.from}–${s.to}</td><td>${fmt1(s.green_avg)}</td><td>${fmt1(s.avg)}</td><td>${s.rival?fmt1(s.rival):"—"}</td><td>${fmt1(s.class_b_top)}</td>
+      <td class="${s.lost_s>0?"bad":"good"}">${s.lost_s>0?"+":"−"}${Math.abs(s.lost_s/60).toFixed(1)} min</td><td class="${s.lost_s>0?"bad":"good"}">${s.lost_s>0?"+":"−"}${Math.abs(s.lost_s/rival.ref).toFixed(1)}</td></tr>`).join("") +
+    (()=>{ const t = rows.reduce((a,s)=>a+s.lost_s,0); return `<tr><td class="l team"><b>Total</b></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="bad"><b>+${(t/60).toFixed(1)} min</b></td><td class="bad"><b>+${(t/rival.ref).toFixed(1)}</b></td></tr>`; })() + `</tbody>`;
+})();
+
+// ---- gantt
+function drawGantt(){
+  const host = document.getElementById("gantt");
+  const W = Math.max(340, host.clientWidth), narrow = W < 640;
+  const labW = narrow ? 110 : 230, rowH = 20, top = 34, gap = 16;
+  const days = [0,1].map(i => { const ts = cars.flatMap(c=>c.stints).filter(s=>new Date(s.t0*1000).getDate()===26+i);
+    return [Math.min(...ts.map(s=>s.t0)), Math.max(...ts.map(s=>s.t1))]; });
+  const span = days.map(([a,b])=>b-a), iw = W - labW - 10 - gap;
+  const dw = span.map(s => s/(span[0]+span[1])*iw);
+  const X = t => { const d = t < days[1][0] - 3600 ? 0 : 1; return labW + (d ? dw[0]+gap : 0) + (t-days[d][0])/span[d]*dw[d]; };
+  const H = top + cars.length*rowH + 26;
+  const ink3 = css("--ink-3"), grid = css("--grid"), panel = css("--panel");
+  let g = "";
+  // hour grid
+  days.forEach(([a,b],d) => {
+    const x0 = X(a);
+    g += `<text class="pl" x="${x0}" y="12">${d?"SUN · DAY 2":"SAT · DAY 1"}</text>`;
+    for (let h = Math.ceil(a/3600)*3600; h <= b; h += 3600){
+      const hr = new Date(h*1000).getHours();
+      g += `<line x1="${X(h)}" x2="${X(h)}" y1="${top-6}" y2="${H-22}" stroke="${grid}"/>`;
+      if ((!narrow || hr%2===0) && X(b)-X(h) > 18) g += `<text x="${X(h)}" y="${H-8}" text-anchor="middle">${hr}:00</text>`;
+    }
+  });
+  g += `<line x1="${X(D.red_at)}" x2="${X(D.red_at)}" y1="${top-6}" y2="${H-22}" stroke="${css("--pos")}" stroke-dasharray="3 3"/>`;
+  g += `<text x="${X(D.red_at)+4}" y="${top-10}" style="fill:${css("--pos")}">red flag</text>`;
+  cars.forEach((c,i) => {
+    const y = top + i*rowH, hi = c===us || c===rival;
+    if (hi) g += `<rect x="0" y="${y}" width="${W}" height="${rowH}" fill="${css(c===us?"--us":"--rival")}" fill-opacity=".12"/>`;
+    const lab = narrow ? `P${c.pos} #${c.num}` : `P${c.pos} #${c.num} ${c.team}`;
+    g += `<text class="rl${hi?" hi":""}" x="4" y="${y+rowH/2+4}">${esc(lab.length>34?lab.slice(0,33)+"…":lab)}</text>`;
+    c.stints.forEach((s,j) => {
+      const x0 = X(s.t0), x1 = X(s.t1);
+      g += `<rect data-c="${c.num}" data-s="${j}" x="${x0}" y="${y+4}" width="${Math.max(1,x1-x0-1)}" height="${rowH-8}" rx="2" fill="${css(clsVar(c.class))}" fill-opacity="${hi?1:.7}"/>`;
+    });
+    c.stops.filter(s=>s.black).forEach(s => { g += `<line x1="${X(s.t)}" x2="${X(s.t)}" y1="${y+1}" y2="${y+rowH-1}" stroke="${css("--ink")}" stroke-width="2"/>`; });
+  });
+  host.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Stint timeline for the top 20 cars">${g}</svg>`;
+  host.querySelectorAll("rect[data-c]").forEach(r => {
+    r.addEventListener("pointermove", ev => {
+      const c = byNum[r.dataset.c], s = c.stints[r.dataset.s];
+      showTip(ev, `<b>#${c.num} ${esc(c.team)}</b><br>Laps ${s.from}–${s.to} · ${s.laps} laps · ${Math.round(s.mins)} min${s.avg?`<br>Clean avg ${fmt1(s.avg)}`:""}`);
+    });
+    r.addEventListener("pointerleave", () => tip.hidden = true);
+  });
+  document.getElementById("gLegend").innerHTML = ["A","B","C"].map(k=>`<span><i class="sw" style="background:var(${clsVar(k)})"></i>Class ${k}</span>`).join("") + `<span><i class="sw" style="background:var(--ink);width:2px"></i>Black flag (ours)</span>`;
+}
+
+// ---- main table
+const COLS = [
+  ["pos","Pos",c=>c.pos],
+  ["team","Team · car",c=>c.team,"l"],
+  ["class","Class",c=>c.class+c.class_pos],
+  ["laps","Laps",c=>c.laps],
+  ["penalty","Pen",c=>c.penalty],
+  ["ref","Clean avg",c=>c.ref],
+  ["top10","Top 10%",c=>c.top10],
+  ["best","Best",c=>c.best],
+  ["sd","σ",c=>c.sd],
+  ["stops","Stops",c=>realStops(c).length],
+  ["stopMed","Median stop cost",c=>{ const v = realStops(c).map(s=>s.loss).sort((a,b)=>a-b); return v[Math.floor(v.length/2)]; }],
+  ["stopTot","Total stop cost",c=>realStops(c).reduce((a,s)=>a+s.loss,0)],
+  ["stint","Median stint",c=>{ const v = c.stints.filter(s=>s.laps>3).map(s=>s.mins).sort((a,b)=>a-b); return v[Math.floor(v.length/2)]; }],
+  ["long","Longest stint",c=>Math.max(...c.stints.map(s=>s.mins))],
+  ["grid","Grid",c=>c.grid_delay],
+];
+let sortKey = "pos", sortDir = 1;
+function drawTable(){
+  const col = COLS.find(c=>c[0]===sortKey);
+  const rows = cars.slice().sort((a,b)=>{ const x = col[2](a), y = col[2](b); return (x>y?1:x<y?-1:0)*sortDir; });
+  const cell = (k,c) => {
+    const v = COLS.find(x=>x[0]===k)[2](c);
+    switch(k){
+      case "team": return `<td class="team l">${esc(c.team)}<small>${c.car ? esc(c.car) + (c.car_conf==="low"?" ?":"") : "car unknown"}</small></td>`;
+      case "class": return `<td><span class="cls" style="background:var(${clsVar(c.class)})">${c.class}</span> ${c.class_pos}</td>`;
+      case "penalty": return `<td>${v?`<span class="bad">−${v}</span>`:""}</td>`;
+      case "ref": case "top10": case "best": return `<td>${fmt1(v)}</td>`;
+      case "sd": return `<td>${v.toFixed(1)}s</td>`;
+      case "stopMed": return `<td>${mins(v)} min</td>`;
+      case "stopTot": return `<td>${mins(v)} min</td>`;
+      case "stint": case "long": return `<td>${Math.round(v)} min</td>`;
+      case "grid": return `<td>+${Math.round(v)}s</td>`;
+      default: return `<td>${v}</td>`;
+    }
+  };
+  document.getElementById("tbl").innerHTML = `<thead><tr>${COLS.map(([k,l,,a])=>`<th class="sort ${a||""} ${k===sortKey?"sorted":""}" data-k="${k}" tabindex="0" aria-sort="${k===sortKey?(sortDir>0?"ascending":"descending"):"none"}">${l}${k===sortKey?(sortDir>0?" ▲":" ▼"):""}</th>`).join("")}</tr></thead><tbody>` +
+    rows.map(c=>`<tr class="${c===us?"us":c===rival?"rival":""}">${COLS.map(([k])=>cell(k,c)).join("")}</tr>`).join("") + `</tbody>`;
+  document.querySelectorAll("#tbl th.sort").forEach(th => {
+    const go = () => { if (sortKey===th.dataset.k) sortDir = -sortDir; else { sortKey = th.dataset.k; sortDir = 1; } drawTable(); };
+    th.addEventListener("click", go); th.addEventListener("keydown", e => { if (e.key==="Enter"||e.key===" ") { e.preventDefault(); go(); } });
+  });
+}
+
+function render(){ drawBars(); drawGantt(); drawTable(); }
+let rt; new ResizeObserver(()=>{ clearTimeout(rt); rt=setTimeout(drawGantt,60); }).observe(document.getElementById("gantt"));
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", render);
+new MutationObserver(render).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+render();
+</script>
