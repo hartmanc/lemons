@@ -73,15 +73,29 @@ th.sort{cursor:pointer} th.sort:hover{color:var(--ink)} th.sorted{color:var(--in
 .legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--ink-2)}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .sw{width:14px;height:10px;border-radius:2px;background:var(--c)}
-.tip{position:fixed;pointer-events:none;background:var(--ink);color:var(--bg);font:12px/1.4 "JetBrains Mono",monospace;padding:6px 9px;white-space:nowrap;z-index:5;font-variant-numeric:tabular-nums}
+.tip{position:fixed;pointer-events:none;background:var(--ink);color:var(--bg);font:12px/1.4 "JetBrains Mono",monospace;padding:6px 9px;white-space:nowrap;z-index:20;font-variant-numeric:tabular-nums}
+.topnav{position:sticky;top:0;z-index:10;background:var(--ink);color:var(--bg)}
+.topnav .in{max-width:1180px;margin:0 auto;padding:0 16px;display:flex;flex-wrap:wrap;align-items:center;gap:0 20px;min-height:46px}
+.topnav a{color:inherit;text-decoration:none}
+.topnav .brand{font:700 18px "Barlow Condensed",sans-serif;text-transform:uppercase;letter-spacing:.04em;padding-block:10px;white-space:nowrap}
+.topnav .brand span{opacity:.6;font-weight:600;margin-left:.35em}
+.topnav .links{display:flex;flex-wrap:wrap;margin-left:auto}
+.topnav .links a{font:600 14px "Barlow Condensed",sans-serif;letter-spacing:.07em;text-transform:uppercase;padding:13px 10px 10px;border-bottom:3px solid transparent;opacity:.72;white-space:nowrap}
+.topnav .links a:hover{opacity:1}
+.topnav .links a[aria-current="page"]{opacity:1;border-bottom-color:currentColor}
+@media (max-width:560px){.topnav .links{margin-left:-10px}}
 :focus-visible{outline:2px solid var(--b);outline-offset:2px}
 </style>
 
+<nav class="topnav" aria-label="Site"><div class="in">
+  <a class="brand" href="index.html">Lemons<span>Buttonwillow 2026</span></a>
+  <div class="links"><a href="index.html">#619 stints</a><a href="field.html" aria-current="page">Top 20 &amp; class B gap</a><a href="https://speedhive.mylaps.com/sessions/12906863">Official results ↗</a></div>
+</div></nav>
 <div class="wrap">
   <header>
     <div>
       <h1><span class="num">Top 20</span>Buttonwillow</h1>
-      <div class="sub">Button Turrible 2026 · 26–27 Sep · official <a href="https://speedhive.mylaps.com/sessions/12906863">MYLAPS results</a> · <a href="index.html">#619 driver stints</a></div>
+      <div class="sub">Button Turrible 2026 · 26–27 Sep · official MYLAPS results</div>
     </div>
     <div class="meta" id="meta"></div>
   </header>
