@@ -46536,146 +46536,32 @@
    }
   }
  ],
- "our_stints": [
-  {
-   "driver": "Sarah",
-   "from": 1,
-   "to": 27,
-   "day": 1,
-   "at": "Sat 10:05\u201311:33",
-   "avg": 190.465,
-   "clean": 21,
-   "green": 26,
-   "green_avg": 194.782,
-   "rival": 156.757,
-   "class_b_top": 164.408,
-   "lost_s": 988.6
+ "potential": {
+  "619": {
+   "laps": 287,
+   "n_fixed": 32,
+   "green_time": 42575.9,
+   "n_green": 255,
+   "black_time": 1015.7,
+   "n_black": 4,
+   "best_stint": {
+    "avg": 155.024,
+    "from": 239,
+    "to": 262
+   }
   },
-  {
-   "driver": "Thomas",
-   "from": 28,
-   "to": 59,
-   "day": 1,
-   "at": "Sat 11:33\u201313:09",
-   "avg": 169.641,
-   "clean": 30,
-   "green": 30,
-   "green_avg": 169.641,
-   "rival": 154.334,
-   "class_b_top": 161.38,
-   "lost_s": 459.2
-  },
-  {
-   "driver": "Coby",
-   "from": 60,
-   "to": 93,
-   "day": 1,
-   "at": "Sat 13:09\u201314:43",
-   "avg": 156.355,
-   "clean": 32,
-   "green": 32,
-   "green_avg": 156.355,
-   "rival": 155.044,
-   "class_b_top": 159.961,
-   "lost_s": 41.9
-  },
-  {
-   "driver": "Pablo",
-   "from": 94,
-   "to": 126,
-   "day": 1,
-   "at": "Sat 14:43\u201316:27",
-   "avg": 163.756,
-   "clean": 24,
-   "green": 26,
-   "green_avg": 169.315,
-   "rival": 172.266,
-   "class_b_top": 168.301,
-   "lost_s": -76.7
-  },
-  {
-   "driver": "Elias",
-   "from": 127,
-   "to": 158,
-   "day": 1,
-   "at": "Sat 16:27\u201318:02",
-   "avg": 158.635,
-   "clean": 26,
-   "green": 26,
-   "green_avg": 158.635,
-   "rival": 164.392,
-   "class_b_top": 164.347,
-   "lost_s": -149.7
-  },
-  {
-   "driver": "Sarah",
-   "from": 159,
-   "to": 183,
-   "day": 2,
-   "at": "Sun 08:58\u201310:16",
-   "avg": 191.502,
-   "clean": 19,
-   "green": 23,
-   "green_avg": 193.654,
-   "rival": 150.706,
-   "class_b_top": 160.964,
-   "lost_s": 987.8
-  },
-  {
-   "driver": "Thomas",
-   "from": 184,
-   "to": 208,
-   "day": 2,
-   "at": "Sun 10:16\u201311:46",
-   "avg": 161.796,
-   "clean": 23,
-   "green": 23,
-   "green_avg": 161.796,
-   "rival": 153.087,
-   "class_b_top": 158.829,
-   "lost_s": 200.3
-  },
-  {
-   "driver": "Elias",
-   "from": 209,
-   "to": 237,
-   "day": 2,
-   "at": "Sun 11:46\u201313:13",
-   "avg": 155.806,
-   "clean": 23,
-   "green": 23,
-   "green_avg": 155.806,
-   "rival": 154.57,
-   "class_b_top": 161.434,
-   "lost_s": 28.4
-  },
-  {
-   "driver": "Pablo",
-   "from": 238,
-   "to": 262,
-   "day": 2,
-   "at": "Sun 13:13\u201314:22",
-   "avg": 155.024,
-   "clean": 23,
-   "green": 23,
-   "green_avg": 155.024,
-   "rival": 164.548,
-   "class_b_top": 158.877,
-   "lost_s": -219.0
-  },
-  {
-   "driver": "Coby",
-   "from": 263,
-   "to": 287,
-   "day": 2,
-   "at": "Sun 14:22\u201315:31",
-   "avg": 155.125,
-   "clean": 23,
-   "green": 23,
-   "green_avg": 155.125,
-   "rival": 162.125,
-   "class_b_top": 158.592,
-   "lost_s": -161.0
+  "192": {
+   "laps": 307,
+   "n_fixed": 23,
+   "green_time": 45205.1,
+   "n_green": 284,
+   "black_time": 0,
+   "n_black": 0,
+   "best_stint": {
+    "avg": 149.967,
+    "from": 29,
+    "to": 49
+   }
   }
- ]
+ }
 }
