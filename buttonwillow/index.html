@@ -484,7 +484,7 @@ function render(){
   const lastL = laps[laps.length-1];
 
   document.getElementById("meta").innerHTML =
-    `${FINISHED ? "Final" : "Day 2 · Lap "+lastLap} · P${lastL.pos} of ${FIELD} · ${lastLap} laps<br>Best ${fmt(allBest.t)} (L${allBest.lap}, ${allBest.driver.name})`;
+    `${FINISHED ? "Final" : "Day 2 · Lap "+lastLap} · P${lastL.pos} of ${FIELD}${FINISHED ? " · P7 in class B" : ""} · ${lastLap} laps<br>Best ${fmt(allBest.t)} (L${allBest.lap}, ${allBest.driver.name})`;
 
   // Laps 1-28 (Sarah plus the start of Thomas's stint) = day 1 length minus everything logged on day 1.
   const unloggedSecs = DAY1_SECS - S.filter(s=>s.d.day===1 && s.secs!=null).reduce((a,s)=>a+s.secs,0);
