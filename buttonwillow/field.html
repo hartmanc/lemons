@@ -89,7 +89,7 @@ th.sort{cursor:pointer} th.sort:hover{color:var(--ink)} th.sorted{color:var(--in
     <div class="panel-head"><h2>What it takes to win class B</h2></div>
     <div class="stats" id="stats"></div>
     <div id="wf"></div>
-    <div class="notes"><p>Laps = fixed laps (stops, yellows, red flag, start laps) + green-flag time ÷ green-lap pace. A car's max is its best stint: the lowest clean average over 15+ laps.</p></div>
+    <div class="notes"><p>Each bar is laps #192 gained on us from that cause; together they add up to the 20-lap gap. Best stint: lowest clean average over 15+ laps.</p></div>
   </section>
 
   <section class="panel">
@@ -117,7 +117,7 @@ const D = FIELD_DATA;
 const cars = D.cars, byNum = Object.fromEntries(cars.map(c=>[c.num,c]));
 const us = byNum[D.us], rival = byNum[D.rival];
 const fmt = t => { const m = Math.floor(t/60), s = t - m*60; return m + ":" + s.toFixed(3).padStart(6,"0"); };
-const fmt1 = t => fmt(t).slice(0,-2);
+const fmt1 = t => fmt(Math.round(t*10)/10).slice(0,-2);
 const mins = s => (s/60).toFixed(1);
 const clsVar = c => ({A:"--a",B:"--b",C:"--c"})[c] || "--a";
 const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
@@ -131,62 +131,68 @@ const showTip = (ev, html) => { tip.hidden = false; tip.innerHTML = html;
 document.getElementById("meta").innerHTML =
   `#${us.num} · P${us.pos} of 105 · P${us.class_pos} in class B · ${us.laps} laps<br>Class B winner #${rival.num} · P${rival.pos} · ${rival.laps} laps`;
 
-// ---- what it takes: laps = fixed laps + green time / green pace
+// ---- what it takes: our laps + each cause of the gap = the class B winner's laps
 function drawWaterfall(){
-  const P = D.potential, me = P[D.us], them = P[D.rival];
-  const pMe = me.best_stint.avg, pThem = them.best_stint.avg;
-  const fixed = me.n_fixed - me.n_black, green = me.green_time + me.black_time;
-  const lapsAt = pace => fixed + green / pace;
+  const g = rival.gap_to_us, P = D.potential;
+  const pMe = P[D.us].best_stint.avg, pThem = P[D.rival].best_stint.avg;
+  const B = us.driving - Object.values(us.excess).reduce((a,v)=>a+v,0);  // our time at race pace
   const target = rival.laps;
   const steps = [
-    {kind:"total", label:"Our race", v:me.laps},
-    {group:"Drive our car to its max", label:"Every green lap at our best stint", desc:fmt1(pMe)+" vs "+fmt1(me.green_time/me.n_green)+" race average", d:(me.n_fixed + me.green_time/pMe) - me.laps},
-    {label:"No black flags", desc:"Laps 224–225 and 236–237", d:lapsAt(pMe) - (me.n_fixed + me.green_time/pMe)},
-    {kind:"total", label:"Our car at its max", v:lapsAt(pMe)},
-    {group:"Faster car", label:`#${rival.num}'s best stint pace`, desc:fmt1(pThem)+" vs our "+fmt1(pMe), d:lapsAt(pThem) - lapsAt(pMe)},
-    {kind:"total", label:`#${rival.num}'s pace, our race`, v:lapsAt(pThem)},
+    {kind:"total", label:"Our race", v:us.laps},
+    {group:"Race execution", label:"Black flags", desc:"Laps 224–225 and 236–237", d:g.black},
+    {label:"Off-pace laps", desc:"Green laps 25%+ over the car's median", d:g.slow},
+    {label:"Pit stops", desc:`Ours cost ${mins(us.excess.stop)} min over 8 stops; theirs ${mins(rival.excess.stop)} over 7`, d:g.stop},
+    {label:"Yellows", desc:`#${rival.num} pitted under one; we never did`, d:g.yellow},
+    {label:"First laps", desc:"Lap 1 and the first lap of day 2", d:g.start},
+    {group:"Timing luck", label:"Spot at the green", desc:`First crossing ${Math.round(us.grid_delay-rival.grid_delay)} s after them`, d:g.grid},
+    {label:"Restart order & checkered", desc:"Where each car was when the flags fell", d:g.timing},
+    {label:"Red flag", desc:"Where each car was when it came out", d:g.red},
+    {group:"Green-flag pace", label:`Match #${rival.num}'s clean average`, desc:`${fmt1(us.ref)} → ${fmt1(rival.ref)}; our best stint was ${fmt1(pMe)}`, d:g.pace, pace:true},
+    {kind:"total", label:`#${rival.num}'s race · class B win`, v:target},
+    {group:"Beyond the win", label:"Our car at its best stint", desc:`${fmt1(rival.ref)} → ${fmt1(pMe)}`, d:B*(1/pMe - 1/rival.ref), pace:true},
+    {label:`#${rival.num}'s car at its best stint`, desc:`${fmt1(pMe)} → ${fmt1(pThem)}`, d:B*(1/pThem - 1/pMe), car:true},
   ];
   let run = 0; steps.forEach(s => { if (s.kind) run = s.v; else { s.a = run; run += s.d; s.b = run; } });
-  const need = green / (target - fixed);
   document.getElementById("stats").innerHTML = [
-    ["--rival", target, `laps won class B (#${rival.num}); we did ${me.laps}`],
-    ["--b", fmt1(need), "green-lap average that gets there, with no black flags"],
-    ["--b", fmt1(pMe), `our best stint (L${me.best_stint.from}–${me.best_stint.to})`],
-    ["--ink-3", fmt1(me.green_time/me.n_green), "our green-lap average for the race"],
+    ["--rival", target, `laps won class B (#${rival.num}); we did ${us.laps}`],
+    ["--b", `${fmt1(us.ref)} → ${fmt1(rival.ref)}`, `clean lap average, ours → #${rival.num}'s`],
+    ["--b", fmt1(pMe), `our best stint (L${P[D.us].best_stint.from}–${P[D.us].best_stint.to})`],
+    ["--rival", fmt1(pThem), `#${rival.num}'s best stint`],
   ].map(([c,v,k])=>`<div class="stat" style="--c:var(${c})"><div class="v">${v}</div><div class="k">${k}</div></div>`).join("");
 
   const host = document.getElementById("wf");
   const W = Math.max(340, host.clientWidth), narrow = W < 640;
-  const labW = narrow ? 150 : 300, rowH = 44, top = 30, groupGap = 22;
-  const lo = Math.floor(Math.min(me.laps, target) - 3), hi = Math.ceil(Math.max(run, target) + 3);
+  const labW = narrow ? 150 : 300, rowH = narrow ? 34 : 40, top = 30, groupGap = 22;
+  const vals = steps.flatMap(s => s.kind ? [s.v] : [s.a, s.b]);
+  const lo = Math.floor(Math.min(...vals) - 2), hi = Math.ceil(Math.max(...vals) + 3);
   const iw = W - labW - 16, X = v => labW + (v-lo)/(hi-lo)*iw;
-  let y = top, g = "";
+  let y = top, gs = "";
   const ys = steps.map(s => { if (s.group) y += groupGap; const r = y; y += rowH; return r; });
-  const H = y + 26, ink = css("--ink"), ink3 = css("--ink-3"), grid = css("--grid"), panel = css("--panel");
-  for (let v = Math.ceil(lo/5)*5; v <= hi; v += 5){
-    g += `<line x1="${X(v)}" x2="${X(v)}" y1="${top-8}" y2="${H-20}" stroke="${grid}"/><text x="${X(v)}" y="${H-6}" text-anchor="middle">${v}</text>`;
-  }
-  g += `<text x="${W-2}" y="${H-6}" text-anchor="end">laps</text>`;
+  const H = y + 26, ink = css("--ink"), ink3 = css("--ink-3"), grid = css("--grid");
+  for (let v = Math.ceil(lo/5)*5; v <= hi; v += 5)
+    gs += `<line x1="${X(v)}" x2="${X(v)}" y1="${top-8}" y2="${H-20}" stroke="${grid}"/><text x="${X(v)}" y="${H-6}" text-anchor="middle">${v}</text>`;
+  gs += `<text x="${W-2}" y="${H-6}" text-anchor="end">laps</text>`;
   steps.forEach((s,i) => {
     const y0 = ys[i], mid = y0 + rowH/2;
-    if (s.group) g += `<text class="gl" x="0" y="${y0-4}">${s.group.toUpperCase()}</text>`;
-    g += `<text class="rl" x="0" y="${mid + (s.desc && !narrow ? -2 : 5)}"${s.kind?' font-weight="600"':''}>${esc(s.label)}</text>`;
-    if (s.desc && !narrow) g += `<text class="rd" x="0" y="${mid+14}">${esc(s.desc)}</text>`;
+    if (s.group) gs += `<text class="gl" x="0" y="${y0-4}">${s.group.toUpperCase()}</text>`;
+    gs += `<text class="rl" x="0" y="${mid + (s.desc && !narrow ? -2 : 5)}"${s.kind?' font-weight="600"':''}>${esc(s.label)}</text>`;
+    if (s.desc && !narrow) gs += `<text class="rd" x="0" y="${mid+14}">${esc(s.desc)}</text>`;
     if (s.kind){
-      g += `<line x1="${X(lo)}" x2="${X(s.v)}" y1="${mid}" y2="${mid}" stroke="${ink3}" stroke-width="1" stroke-dasharray="2 3"/>`;
-      g += `<rect x="${X(s.v)-3}" y="${y0+8}" width="6" height="${rowH-16}" rx="1" fill="${ink}"/>`;
-      g += `<text class="vl" x="${X(s.v)+8}" y="${mid+4}">${s.v.toFixed(1)}</text>`;
+      gs += `<line x1="${X(lo)}" x2="${X(s.v)}" y1="${mid}" y2="${mid}" stroke="${ink3}" stroke-dasharray="2 3"/>`;
+      gs += `<rect x="${X(s.v)-3}" y="${y0+6}" width="6" height="${rowH-12}" rx="1" fill="${ink}"/>`;
+      gs += `<text class="vl" x="${X(s.v)+8}" y="${mid+4}">${s.v.toFixed(1)}</text>`;
     } else {
-      const c = css(s.group === "Faster car" || steps[i-1].group === "Faster car" ? "--rival" : "--b");
-      const beyond = s.a >= target;
-      g += `<rect x="${X(s.a)}" y="${y0+10}" width="${Math.max(1,X(s.b)-X(s.a))}" height="${rowH-20}" rx="2" fill="${c}" fill-opacity="${beyond?.35:1}"/>`;
-      g += `<text class="vl" x="${X(s.b)+6}" y="${mid+4}">+${s.d.toFixed(1)}</text>`;
+      const col = s.car ? "--rival" : s.pace ? "--b" : s.d < 0 ? "--neg" : s.group === "Timing luck" || steps.slice(0,i).reverse().find(x=>x.group)?.group === "Timing luck" ? "--a" : "--pos";
+      const x0 = X(Math.min(s.a,s.b)), x1 = X(Math.max(s.a,s.b));
+      gs += `<rect x="${x0}" y="${y0+9}" width="${Math.max(1.5,x1-x0)}" height="${rowH-18}" rx="2" fill="${css(col)}" fill-opacity="${s.a >= target - 1e-9 ? .45 : 1}"/>`;
+      gs += `<text class="vl" x="${x1+6}" y="${mid+4}">${s.d>=0?"+":"−"}${Math.abs(s.d).toFixed(1)}</text>`;
     }
-    if (i) g += `<line x1="${X(steps[i-1].kind ? steps[i-1].v : steps[i-1].b)}" x2="${X(steps[i-1].kind ? steps[i-1].v : steps[i-1].b)}" y1="${ys[i-1]+rowH-10}" y2="${y0+10}" stroke="${ink3}" stroke-dasharray="2 2"/>`;
+    if (i){ const pv = steps[i-1].kind ? steps[i-1].v : steps[i-1].b;
+      gs += `<line x1="${X(pv)}" x2="${X(pv)}" y1="${ys[i-1]+rowH-8}" y2="${y0+8}" stroke="${ink3}" stroke-dasharray="2 2"/>`; }
   });
-  g += `<line x1="${X(target)}" x2="${X(target)}" y1="${top-14}" y2="${H-20}" stroke="${css("--rival")}" stroke-width="2"/>`;
-  g += `<text class="tl" x="${X(target)}" y="${top-18}" text-anchor="middle" style="fill:${css("--rival")}">CLASS B WIN · ${target}</text>`;
-  host.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Waterfall from our ${me.laps} laps to the class B winning ${target} laps">${g}</svg>`;
+  gs += `<line x1="${X(target)}" x2="${X(target)}" y1="${top-14}" y2="${H-20}" stroke="${css("--rival")}" stroke-width="2"/>`;
+  gs += `<text class="tl" x="${X(target)}" y="${top-18}" text-anchor="middle" style="fill:${css("--rival")}">CLASS B WIN · ${target}</text>`;
+  host.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Waterfall from our ${us.laps} laps to the class B winning ${target} laps">${gs}</svg>`;
 }
 
 // ---- gantt
