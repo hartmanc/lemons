@@ -3,7 +3,7 @@
 Usage: python3 scripts/analyze_field.py
 Writes buttonwillow/data/field.json and field.js (the same data as a script the page can load from disk).
 """
-import csv, json, statistics as st
+import bisect, csv, json, statistics as st
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
@@ -12,9 +12,13 @@ DATA = Path(__file__).resolve().parent.parent / "buttonwillow" / "data"
 TOP = 20
 US, RIVAL = "619", "192"  # us, and the class B winner
 RED_AT = datetime(2026, 9, 27, 10, 32)  # the day 2 red flag (Pinto rollover) was out at this moment
-SLOW = 1.25  # a green lap over 1.25x the car's median is an incident / off-pace lap, not pace
+# A green lap is a field slowdown (local yellow, debris, a yellow ending mid-lap) when the median
+# car on track over the same stretch ran more than FIELD_SLOW x its own median lap. Other green
+# laps over INCIDENT x the car's median are the car's own incidents; everything else is pace.
+FIELD_SLOW = 1.10
+INCIDENT = 1.5
 DRIVE_THROUGH = 45  # an in-pit lap costing less than this (s) is a drive-through, not a stop
-CODE = {"clean": "c", "slow": "o", "stop": "p", "start": "g", "yellow": "y", "red": "r", "overnight": "n"}
+CODE = {"clean": "c", "slowdown": "s", "incident": "i", "stop": "p", "start": "g", "yellow": "y", "red": "r", "overnight": "n"}
 # Stops we know were black flags rather than driver changes (in-pit lap numbers).
 BLACK = {"619": {224, 236}}
 
@@ -27,6 +31,30 @@ for r in csv.DictReader(open(DATA / "laps.csv")):
     laps[r["num"]].append({"lap": int(r["lap"]), "t": t, "end": end, "start": end - t,
                            "pos": int(r["field_pos"]), "pit": r["in_pit"] == "1", "yellow": r["yellow"] == "1"})
 race_start = min(l["start"] for ls in laps.values() for l in ls if l["lap"] == 1)
+
+
+def field_points():
+    """Every car's lap as (midpoint time, car, lap time / that car's median green lap)."""
+    pts = []
+    for num, L in laps.items():
+        green = [l["t"] for i, l in enumerate(L) if i and not (l["pit"] or l["yellow"] or L[i - 1]["pit"]) and l["t"] < 3600]
+        if len(green) < 20:
+            continue
+        m = st.median(green)
+        pts += [((l["start"] + l["end"]) / 2, num, l["t"] / m) for i, l in enumerate(L)
+                if not l["pit"] and l["t"] < 1800 and not (i and L[i - 1]["pit"])]
+    return sorted(pts)
+
+
+PTS = field_points()
+PT_KEYS = [p[0] for p in PTS]
+
+
+def field_ratio(l, num):
+    """Median pace of the rest of the field, relative to each car's normal, while this lap was run."""
+    a, b = bisect.bisect_left(PT_KEYS, l["start"]), bisect.bisect_right(PT_KEYS, l["end"])
+    r = [p[2] for p in PTS[a:b] if p[1] != num]
+    return st.median(r) if r else 1.0
 hhmm = lambda ts: datetime.fromtimestamp(ts).strftime("%a %H:%M")
 
 
@@ -57,7 +85,8 @@ def analyze(num):
     for i, l in enumerate(L):
         l["kind"] = ("overnight" if l["overnight"] else "stop" if i in in_stop else "red" if l["red"] else
                      "yellow" if l["yellow"] else "start" if i in first else
-                     "slow" if l["t"] > SLOW * med else "clean")
+                     "slowdown" if field_ratio(l, num) > FIELD_SLOW else
+                     "incident" if l["t"] > INCIDENT * med else "clean")
     clean = sorted(l["t"] for l in L if l["kind"] == "clean")
     ref = st.mean(clean)
 
@@ -78,7 +107,7 @@ def analyze(num):
                           "yellow": any(l["yellow"] for l in ls), "red": bool(red), "black": black,
                           "drive": loss < DRIVE_THROUGH})
     for l in L:
-        if l["kind"] in ("red", "yellow", "start", "slow"):
+        if l["kind"] in ("red", "yellow", "start", "slowdown", "incident"):
             excess[l["kind"]] += l["t"] - ref
 
     # Stints: running between stops (known black flags aside) and the overnight break. A stint
@@ -109,7 +138,7 @@ def analyze(num):
             "top10": round(st.mean(clean[:max(1, len(clean) // 10)]), 3), "sd": round(st.stdev(clean), 2),
             "grid_delay": round(L[0]["start"] - race_start, 1), "driving": round(driving, 1),
             "excess": {k: round(v, 1) for k, v in excess.items()},
-            "counts": {k: sum(1 for l in L if l["kind"] == k) for k in ("clean", "slow", "yellow", "stop", "red")},
+            "counts": {k: sum(1 for l in L if l["kind"] == k) for k in ("clean", "slowdown", "incident", "yellow", "stop", "red")},
             "stops": stop_rows, "stints": stint_rows,
             "lap_rows": [[l["lap"], round(l["t"], 3), l["pos"], CODE[l["kind"]], round(l["end"])] for l in L]}
 
@@ -153,7 +182,7 @@ def potential(c):
     The car's apparent maximum is its best stint: the lowest clean average over a stint of 15+ laps.
     """
     rows = c["lap_rows"]
-    green = [r[1] for r in rows if r[3] in "co"]
+    green = [r[1] for r in rows if r[3] in "csi"]
     black_laps = {n + k for s in c["stops"] if s["black"] for n in [s["lap"]] for k in (0, 1)}
     black = [r[1] for r in rows if r[0] in black_laps]
     best = min((s for s in c["stints"] if s["avg"] and s["laps"] >= 15), key=lambda s: s["avg"])

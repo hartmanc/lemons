@@ -106,7 +106,7 @@ th.sort{cursor:pointer} th.sort:hover{color:var(--ink)} th.sorted{color:var(--in
       <h2>Top 20: pace, stops and stints</h2>
     </div>
     <div class="tbl"><table id="tbl"></table></div>
-    <div class="notes"><p><b>Clean avg</b>: green laps, excluding in/out-laps and laps 25%+ off the car's median. <b>Stop cost</b>: in-lap + out-lap minus two clean laps. <b>Grid</b>: seconds after the leader of first crossing the line. <b>Pen</b>: penalty laps.</p></div>
+    <div class="notes"><p><b>Clean avg</b>: green laps, excluding in/out-laps, field-wide slowdowns and incident laps. <b>Stop cost</b>: in-lap + out-lap minus two clean laps. <b>Grid</b>: seconds after the leader of first crossing the line. <b>Pen</b>: penalty laps.</p></div>
   </section>
 </div>
 <div class="tip" hidden></div>
@@ -140,13 +140,14 @@ function drawWaterfall(){
   const steps = [
     {kind:"total", label:"Our race", v:us.laps},
     {group:"Race execution", label:"Black flags", desc:"Laps 224–225 and 236–237", d:g.black},
-    {label:"Off-pace laps", desc:"Green laps 25%+ over the car's median", d:g.slow},
+    {label:"Incidents", desc:"Very slow laps the rest of the field didn't have", d:g.incident||0},
     {label:"Pit stops", desc:`Ours cost ${mins(us.excess.stop)} min over 8 stops; theirs ${mins(rival.excess.stop)} over 7`, d:g.stop},
     {label:"Yellows", desc:`#${rival.num} pitted under one; we never did`, d:g.yellow},
     {label:"First laps", desc:"Lap 1 and the first lap of day 2", d:g.start},
     {group:"Timing luck", label:"Spot at the green", desc:`First crossing ${Math.round(us.grid_delay-rival.grid_delay)} s after them`, d:g.grid},
     {label:"Restart order & checkered", desc:"Where each car was when the flags fell", d:g.timing},
     {label:"Red flag", desc:"Where each car was when it came out", d:g.red},
+    {label:"Field slowdowns", desc:"Green laps where the whole field slowed (local yellows)", d:g.slowdown},
     {group:"Green-flag pace", label:`Match #${rival.num}'s clean average`, desc:`${fmt1(us.ref)} → ${fmt1(rival.ref)}; our best stint was ${fmt1(pMe)}`, d:g.pace, pace:true},
     {kind:"total", label:`#${rival.num}'s race · class B win`, v:target},
     {group:"Beyond the win", label:"Our car at its best stint", desc:`${fmt1(rival.ref)} → ${fmt1(pMe)}`, d:B*(1/pMe - 1/rival.ref), pace:true},
